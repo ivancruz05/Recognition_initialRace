@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sprint-analysis"
+version = "1.0.0"
+description = "Sprint start position analysis using Computer Vision and LiDAR"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Santiago Vasquez"}
+]
+dependencies = [
+    "opencv-python>=4.8.0",
+    "mediapipe>=0.10.14",
+    "numpy<2",
+    "click>=8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+sprint = "sprint_analysis.cli.main:cli"
+
+[tool.setuptools.packages.find]
+include = ["sprint_analysis*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
