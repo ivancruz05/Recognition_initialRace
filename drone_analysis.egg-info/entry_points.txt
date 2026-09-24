@@ -1,0 +1,2 @@
+[console_scripts]
+drone = drone_analysis.cli.main:cli

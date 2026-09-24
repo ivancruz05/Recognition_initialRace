@@ -1,0 +1,73 @@
+{
+  "dataset_name": "synthetic_sprint_biomechanics",
+  "version": "1.0.0",
+  "seed": 2026,
+  "synthetic": true,
+  "contains_personal_data": false,
+  "description": "Synthetic 10 m sprint trials for posture, velocity, stride length and cadence modeling.",
+  "tables": {
+    "athletes.csv": "One row per synthetic athlete.",
+    "trials.csv": "One row per trial; target for time_10m_s and quality_class.",
+    "frame_features.csv": "Time-series features extracted at the configured frame rate.",
+    "splits.csv": "Athlete-level train/validation/test split."
+  },
+  "feature_columns": [
+    "age",
+    "height_cm",
+    "weight_kg",
+    "experience_years",
+    "training_level",
+    "sex_encoded",
+    "avg_knee_angle",
+    "avg_hip_angle",
+    "trunk_angle",
+    "knee_symmetry",
+    "hip_symmetry",
+    "posture_score",
+    "camera_height_m",
+    "camera_distance_m",
+    "camera_angle_deg",
+    "lighting_lux",
+    "signal_quality",
+    "visibility_ratio",
+    "tracking_confidence",
+    "pose_confidence"
+  ],
+  "targets": {
+    "time_10m_s": "10 m sprint time in seconds; regression target.",
+    "quality_class": "buena, regular or mala; classification target.",
+    "average_speed_ms": "Average speed in m/s.",
+    "max_speed_ms": "Maximum speed in m/s.",
+    "stride_length_m": "Distance per step in meters.",
+    "cadence_steps_s": "Steps per second."
+  },
+  "units": {
+    "angles": "degrees",
+    "distances": "meters",
+    "speed": "m/s",
+    "cadence": "steps/s",
+    "time": "seconds"
+  },
+  "generation": {
+    "n_athletes": 200,
+    "min_trials": 3,
+    "max_trials": 5,
+    "fps": 30,
+    "noise_level": 0.15,
+    "outlier_rate": 0.05,
+    "train_ratio": 0.7,
+    "val_ratio": 0.15,
+    "sprint_distance_m": 10.0,
+    "max_frames_per_trial": null
+  },
+  "rows": {
+    "athletes": 200,
+    "trials": 796,
+    "frames": 56764,
+    "trials_by_split": {
+      "train": 559,
+      "val": 116,
+      "test": 121
+    }
+  }
+}
