@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sprint-analysis"
+name = "drone-analysis"
 version = "1.0.0"
-description = "Sprint start position analysis using Computer Vision and LiDAR"
+description = "Software de análisis de video por drones autónomos para biomecánica deportiva"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -13,9 +13,15 @@ authors = [
     {name = "Santiago Vasquez"}
 ]
 dependencies = [
-    "opencv-python>=4.8.0",
+    "opencv-contrib-python>=4.8.0",
     "mediapipe>=0.10.14",
+    "ultralytics>=8.0",
+    "lapx>=0.5",
     "numpy<2",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    "joblib>=1.3",
     "click>=8.0",
 ]
 
@@ -26,10 +32,10 @@ dev = [
 ]
 
 [project.scripts]
-sprint = "sprint_analysis.cli.main:cli"
+drone = "drone_analysis.cli.main:cli"
 
 [tool.setuptools.packages.find]
-include = ["sprint_analysis*"]
+include = ["drone_analysis*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

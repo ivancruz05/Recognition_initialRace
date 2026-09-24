@@ -1,1 +1,0 @@
-"""Recognition initialRace - FASE 1: Pipeline de Computer Vision + LiDAR."""

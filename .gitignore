@@ -1,5 +1,16 @@
+.venv/
 env/
 __pycache__/
 *.py[cod]
 *.log
 .pytest_cache/
+
+# Model weights downloaded at runtime
+*.pt
+
+# Large local datasets
+data/athletes/*/
+data/r3d_extracted/
+
+# IDE
+.idea/

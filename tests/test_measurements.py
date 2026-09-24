@@ -3,7 +3,12 @@
 import numpy as np
 import pytest
 
-from src.measurements import angle_at, estimate_all_distances, estimate_joint_angles, estimate_scale
+from drone_analysis.infrastructure.pose.geometry import (
+    angle_at,
+    estimate_all_distances,
+    estimate_joint_angles,
+    estimate_scale,
+)
 
 
 def _full_body(view=None, width=100, height=100):

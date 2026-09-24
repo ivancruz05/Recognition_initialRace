@@ -1,140 +1,91 @@
-# Roadmap - Reconocimiento de Posición de Arranque
+# Roadmap - Software de Análisis de Video por Drones Autónomos
 
 ## Visión General
-Sistema de análisis automático de posición de sprint: sube video → ML analiza 2D → LiDAR da profundidad → comparación automática → predicciones.
-
----
-
-## FLUJO PRINCIPAL
+Sistema para evaluar variables biomecánicas de atletas (postura, velocidad, longitud de zancada y cadencia) a partir de video capturado por un dron autónomo (DJI Spark) en el CADI de atletismo.
 
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│  USUARIO    │    │  SISTEMA    │    │     ML      │    │  RESULTADO  │
-│  sube video │───▶│  procesa    │───▶│  analiza    │───▶│  predicción │
+│  VIDEO      │───▶│  ESTABILIZ. │───▶│  TRACKING   │───▶│  POSE ROI   │
+│  dron .mp4  │    │  + ArUco    │    │  YOLOv8     │    │  MediaPipe  │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-     .r3d              frames           keypoints           reporte
-     .mp4              + depth          2D + 3D             automático
+                                                               │
+                    ┌──────────────────────────────────────────┘
+                    ▼
+            ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+            │  CALIBRACIÓN│───▶│  CINEMÁTICA │───▶│  VALIDACIÓN │
+            │  px -> m    │    │  v, zancada,│    │  vs. manual │
+            │             │    │  cadencia   │    │  error %    │
+            └─────────────┘    └─────────────┘    └─────────────┘
 ```
 
 ---
 
-## FASE 1: Proof of Concept ✅
-**Objetivo:** Pipeline básico de video → pose → keypoints
+## FASE 1 - Diseño y desarrollo del software ✅
 
-| Componente | Estado | Archivo |
-|------------|--------|---------|
-| MediaPipe Pose (33 landmarks) | ✅ | `src/pose.py` |
-| Depth map sampling | ✅ | `src/depth.py` |
-| Fusión MediaPipe + LiDAR → 3D | ✅ | `src/fusion.py` |
-| Point cloud generation (PLY) | ✅ | `src/ply.py` |
-| Datos sintéticos para testing | ✅ | `src/synthetic.py` |
-| Parser de archivos .r3d | ✅ | `r3d_parser.py` |
+| Componente | Estado | Archivo principal |
+|------------|--------|-------------------|
+| Calibración ArUco px→m | ✅ | `drone_analysis/infrastructure/calibration/aruco.py` |
+| Detección y seguimiento atleta (YOLOv8 + ByteTrack) | ✅ | `drone_analysis/infrastructure/tracking/athlete_tracker.py` |
+| Estimación de pose en ROI (MediaPipe) | ✅ | `drone_analysis/infrastructure/pose/detector.py` |
+| Estabilización de video de dron | ✅ | `drone_analysis/infrastructure/video/stabilizer.py` |
+| Pipeline end-to-end | ✅ | `drone_analysis/application/drone_pipeline.py` |
 
 ---
 
-## FASE 2: Procesamiento Automático ✅
-**Objetivo:** Subir video y obtener análisis automático
+## FASE 2 - Pruebas del software ✅
 
-| Tarea | Estado |
-|-------|--------|
-| Parser de .r3d → frames + depth | ✅ |
-| Extracción de keypoints de video | ✅ |
-| Guardado de resultados | ✅ |
-
----
-
-## FASE 3: Análisis Biomecánico ✅
-**Objetivo:** Calcular métricas de posición de salida
-
-| Métrica | Estado |
-|---------|--------|
-| Ángulo de rodilla | ✅ |
-| Ángulo de cadera | ✅ |
-| Ángulo de tobillo | ✅ |
-| Ángulo de tronco | ✅ |
-| Distancia entre pies | ✅ |
-| Altura de cadera | ✅ |
+| Tarea | Estado | Detalle |
+|-------|--------|---------|
+| Tests unitarios de calibración | ✅ | `tests/test_calibration.py` |
+| Tests unitarios de tracking/crop | ✅ | `tests/test_tracker.py` |
+| Tests unitarios de cinemática | ✅ | `tests/test_kinematics.py` |
+| Tests unitarios de validación | ✅ | `tests/test_validation.py` |
+| Tests unitarios de estabilización | ✅ | `tests/test_stabilizer.py` |
+| CLI funcional | ✅ | `drone --help` |
 
 ---
 
-## FASE 4: Comparación con Referencia ✅
-**Objetivo:** Comparar automáticamente con posición óptima
+## FASE 3 - Validación con grupo piloto ⏳
 
-| Tarea | Estado |
-|-------|--------|
-| Referencia óptima (literatura) | ✅ |
-| Cálculo de errores | ✅ |
-| Reporte de desviaciones | ✅ |
-
----
-
-## FASE 5: Machine Learning para Predicciones ⏳
-**Objetivo:** ML analiza video 2D para predecir rendimiento
-
-### 5.1 Entrenamiento del Modelo
-| Tarea | Estado |
-|-------|--------|
-| Recopilar dataset de videos de sprint | ⏳ |
-| Extraer features de keypoints 2D | ⏳ |
-| Etiquetar datos (tiempo, calidad) | ⏳ |
-| Entrenar modelo de clasificación | ⏳ |
-| Entrenar modelo de regresión (tiempo) | ⏳ |
-
-### 5.2 Features para ML
-| Feature | Descripción | Estado |
-|---------|-------------|--------|
-| `knee_angle_diff` | Diferencia rodilla delantera vs trasera | ⏳ |
-| `hip_angle_front` | Ángulo cadera delantera | ⏳ |
-| `trunk_inclination` | Inclinación del tronco | ⏳ |
-| `height_ratio` | Proporción altura cadera/suelo | ⏳ |
-| `foot_distance` | Distancia entre pies | ⏳ |
-| `symmetry_score` | Simetría izquierda vs derecha | ⏳ |
-| `velocity_features` | Velocidad de movimiento (frames) | ⏳ |
-
-### 5.3 Predicciones
-| Predicción | Tipo | Estado |
-|------------|------|--------|
-| Calidad de posición (1-10) | Clasificación | ⏳ |
-| Tiempo estimado de reacción | Regresión | ⏳ |
-| Errores comunes detectados | Clasificación multilabel | ⏳ |
-| Recomendaciones personalizadas | Reglas + ML | ⏳ |
+| Tarea | Estado | Detalle |
+|-------|--------|---------|
+| Captura con dron DJI Spark y 20 estudiantes | ⏳ | Pendiente de disponibilidad de video |
+| Registro manual cuadro a cuadro | ⏳ | Plantilla generada por `drone groundtruth` |
+| Comparación automática vs. manual | ✅ | `drone_analysis/analysis/validation.py` |
+| Cálculo de error absoluto y porcentual | ✅ | `drone validate <results> <ground_truth>` |
+| Criterios ISO/IEC 25010 | ✅ | Bandas EXCELLENT / ACCEPTABLE / LIMIT / UNACCEPTABLE |
 
 ---
 
-## FASE 6: Interfaz de Subida Automática ⏳
-**Objetivo:** Subir video y obtener resultado automáticamente
+## Comandos CLI
 
-| Tarea | Estado |
-|-------|--------|
-| Interfaz de subida de archivos | ⏳ |
-| Procesamiento en background | ⏳ |
-| Notificación de resultado | ⏳ |
-| Historial de análisis | ⏳ |
+```bash
+# Calibrar con ArUco
+drone calibrate reference.jpg -o calibration.json
 
----
+# Analizar video
+drone analyze video.mp4 -c calibration.json -o output/
 
-## FASE 7: Dashboard de Análisis ⏳
-**Objetivo:** Visualizar tendencias y predicciones
+# Generar video anotado
+drone annotate video.mp4 -c calibration.json -o annotated.mp4
 
-| Tarea | Estado |
-|-------|--------|
-| Gráficas de evolución por atleta | ⏳ |
-| Comparación entre sesiones | ⏳ |
-| Alertas de deterioro | ⏳ |
-| Exportar reportes | ⏳ |
+# Crear plantilla de anotación manual
+drone groundtruth video.mp4 -o ground_truth.json
+
+# Validar resultados
+drone validate output/results.json ground_truth.json -o validation.json
+```
 
 ---
 
-## Progreso General
+## Dependencias principales
 
-| Fase | Estado | Descripción |
-|------|--------|-------------|
-| FASE 1 | ✅ | Pipeline básico |
-| FASE 2 | ✅ | Procesamiento automático |
-| FASE 3 | ✅ | Análisis biomecánico |
-| FASE 4 | ✅ | Comparación con referencia |
-| FASE 5 | ⏳ | ML para predicciones |
-| FASE 6 | ⏳ | Interfaz de subida |
-| FASE 7 | ⏳ | Dashboard |
+- `opencv-contrib-python` (ArUco + video)
+- `mediapipe` (pose 33 landmarks)
+- `ultralytics` (YOLOv8 + tracker)
+- `numpy`, `scipy`
+- `click`, `pytest`
 
-**Progreso: 4/7 fases completadas (57%)**
+## Progreso general
+
+**Fases completadas: 2/3 (66%)** — en espera de videos del dron para la validación de campo.
