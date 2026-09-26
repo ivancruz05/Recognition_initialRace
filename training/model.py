@@ -14,7 +14,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, f1_score, mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 
-from drone_analysis.ml.features import DEFAULT_FEATURE_COLUMNS, as_feature_frame, validate_feature_columns
+from training.features import DEFAULT_FEATURE_COLUMNS, as_feature_frame, validate_feature_columns
 
 
 @dataclass(frozen=True)

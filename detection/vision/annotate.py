@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from drone_analysis.domain.constants import CONNECTIONS, GROUP_COLORS, LANDMARKS
-from drone_analysis.domain.models import PoseLandmarks
+from detection.constants import CONNECTIONS, GROUP_COLORS, LANDMARKS
+from detection.entities import PoseLandmarks
 
 
 class FrameAnnotator:

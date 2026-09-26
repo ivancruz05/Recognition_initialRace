@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from drone_analysis.domain.models import KinematicsResult, LandmarkIndex, PoseLandmarks
-from drone_analysis.infrastructure.calibration.aruco import ArUcoCalibration
+from detection.entities import KinematicsResult, LandmarkIndex, PoseLandmarks
+from detection.interfaces import PixelToWorldTransform
 
 
 @dataclass
@@ -25,7 +25,7 @@ class KinematicsAnalyzer:
 
     def __init__(
         self,
-        calibration: ArUcoCalibration,
+        calibration: PixelToWorldTransform,
         visibility_threshold: float = 0.5,
         smoothing_window: int = 7,
     ):

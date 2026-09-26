@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from drone_analysis.infrastructure.tracking.athlete_tracker import (
+from detection.vision.tracker import (
     AthleteTracker,
     crop_bbox,
 )

@@ -7,11 +7,11 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from drone_analysis.analysis.biomechanics import BiomechanicsAnalyzer
-from drone_analysis.analysis.comparison import ReferenceComparator
-from drone_analysis.analysis.measurements import BodyMeasurementAnalyzer
-from drone_analysis.analysis.ml import MLAnalyzer
-from drone_analysis.domain.models import (
+from detection.metrics.biomechanics import BiomechanicsAnalyzer
+from detection.metrics.comparison import ReferenceComparator
+from detection.metrics.measurements import BodyMeasurementAnalyzer
+from detection.metrics.ml_features import MLAnalyzer
+from detection.entities import (
     AnalysisReport,
     BodyMeasurements,
     ComparisonResult,
@@ -20,20 +20,10 @@ from drone_analysis.domain.models import (
     SprintMetrics,
     VideoInfo,
 )
-from drone_analysis.infrastructure.pose.detector import PoseDetector
-
-from drone_analysis.infrastructure.pose.view_detection import ViewType, detect_view
-from drone_analysis.infrastructure.pose.pose_validation import validate_pose, format_validation_report
-from drone_analysis.infrastructure.pose.constants import MIN_VALID_FRAMES
-
-
-def _pose_landmarks_to_array(landmarks: PoseLandmarks) -> np.ndarray:
-    """Convierte PoseLandmarks del dominio a array numpy (33, 4)."""
-    arr = np.zeros((33, 4))
-    for idx, lm in landmarks.landmarks.items():
-        if idx < 33:
-            arr[idx] = [lm.x, lm.y, lm.z, lm.visibility]
-    return arr
+from detection.vision.pose import PoseDetector, landmarks_to_array
+from detection.vision.view_detection import ViewType
+from detection.vision.pose_validation import validate_pose
+from detection.vision.pose_constants import MIN_VALID_FRAMES
 
 
 class AnalysisService:
@@ -140,7 +130,7 @@ class AnalysisService:
 
             # BUG FIX 2: In non-strict mode, process invalid frames too.
             # Only skip if strict mode is enabled AND validation failed.
-            lm_array = _pose_landmarks_to_array(landmarks)
+            lm_array = landmarks_to_array(landmarks)
             validation = validate_pose(lm_array, self.required_view)
             view_type = validation.view.view_type.value if validation.view else "unknown"
             view_counts[view_type] = view_counts.get(view_type, 0) + 1

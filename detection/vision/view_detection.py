@@ -15,12 +15,12 @@ from enum import Enum
 
 import numpy as np
 
-from drone_analysis.infrastructure.pose.constants import (
+from detection.vision.pose_constants import (
     VIEW_FRONT_SHOULDER_THRESHOLD,
     VIEW_PROFILE_Z_RATIO,
     VIEW_MIN_VISIBILITY,
 )
-from drone_analysis.infrastructure.pose import landmarks as lm
+from detection.vision import landmarks as lm
 
 
 class ViewType(Enum):

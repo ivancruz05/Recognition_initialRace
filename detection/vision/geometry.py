@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from drone_analysis.infrastructure.pose import landmarks as lm
-from drone_analysis.infrastructure.pose.constants import VISIBILITY_THRESHOLD
+from detection.vision import landmarks as lm
+from detection.vision.pose_constants import VISIBILITY_THRESHOLD
 
 # Distancias de referencia del cuerpo humano en metros (promedios).
 REFERENCE_DISTANCES = {

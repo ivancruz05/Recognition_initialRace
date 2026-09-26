@@ -2,7 +2,7 @@
 
 import pytest
 
-from drone_analysis.analysis.validation import ValidationAnalyzer
+from detection.metrics.validation import ValidationAnalyzer
 
 
 def test_validation_computes_errors():

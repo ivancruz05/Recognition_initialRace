@@ -8,8 +8,8 @@ from typing import Dict
 
 import pandas as pd
 
-from drone_analysis.ml.features import DEFAULT_FEATURE_COLUMNS
-from drone_analysis.ml.model import SprintMLConfig, SprintMLModel
+from training.features import DEFAULT_FEATURE_COLUMNS
+from training.model import SprintMLConfig, SprintMLModel
 
 
 def train_baseline(

@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from drone_analysis.analysis.kinematics import KinematicsAnalyzer
-from drone_analysis.domain.models import Landmark3D, PoseLandmarks
-from drone_analysis.infrastructure.calibration.aruco import ArUcoCalibration
+from detection.metrics.kinematics import KinematicsAnalyzer
+from detection.entities import Landmark3D, PoseLandmarks
+from detection.vision.calibration import ArUcoCalibration
 
 
 def _landmarks(

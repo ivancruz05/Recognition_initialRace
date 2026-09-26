@@ -20,15 +20,31 @@ Sistema para evaluar variables biomecánicas de atletas (postura, velocidad, lon
 
 ---
 
+## ARQUITECTURA
+
+Repositorio modularizado por preocupación (no por capa técnica):
+
+| Módulo | Responsabilidad |
+|--------|-----------------|
+| `detection/` | Video → métricas biomecánicas. `metrics/` = math pura, `vision/` = adaptadores cv2/mediapipe/ultralytics |
+| `training/` | Dataset sintético, features, entrenamiento del baseline y notebooks |
+| `backend/` | API HTTP (FastAPI). Solo traduce HTTP ↔ `detection` |
+| `frontend/` | Cliente web (placeholder) |
+
+Regla de dependencia: `detection/metrics/` no importa `detection/vision/`.
+Detalle completo en [README.md](README.md).
+
+---
+
 ## FASE 1 - Diseño y desarrollo del software ✅
 
 | Componente | Estado | Archivo principal |
 |------------|--------|-------------------|
-| Calibración ArUco px→m | ✅ | `drone_analysis/infrastructure/calibration/aruco.py` |
-| Detección y seguimiento atleta (YOLOv8 + ByteTrack) | ✅ | `drone_analysis/infrastructure/tracking/athlete_tracker.py` |
-| Estimación de pose en ROI (MediaPipe) | ✅ | `drone_analysis/infrastructure/pose/detector.py` |
-| Estabilización de video de dron | ✅ | `drone_analysis/infrastructure/video/stabilizer.py` |
-| Pipeline end-to-end | ✅ | `drone_analysis/application/drone_pipeline.py` |
+| Calibración ArUco px→m | ✅ | `detection/vision/calibration.py` |
+| Detección y seguimiento atleta (YOLOv8 + ByteTrack) | ✅ | `detection/vision/tracker.py` |
+| Estimación de pose en ROI (MediaPipe) | ✅ | `detection/vision/pose.py` |
+| Estabilización de video de dron | ✅ | `detection/vision/stabilizer.py` |
+| Pipeline end-to-end | ✅ | `detection/pipeline.py` |
 
 ---
 
@@ -36,11 +52,11 @@ Sistema para evaluar variables biomecánicas de atletas (postura, velocidad, lon
 
 | Tarea | Estado | Detalle |
 |-------|--------|---------|
-| Tests unitarios de calibración | ✅ | `tests/test_calibration.py` |
-| Tests unitarios de tracking/crop | ✅ | `tests/test_tracker.py` |
-| Tests unitarios de cinemática | ✅ | `tests/test_kinematics.py` |
-| Tests unitarios de validación | ✅ | `tests/test_validation.py` |
-| Tests unitarios de estabilización | ✅ | `tests/test_stabilizer.py` |
+| Tests unitarios de calibración | ✅ | `tests/detection/test_calibration.py` |
+| Tests unitarios de tracking/crop | ✅ | `tests/detection/test_tracker.py` |
+| Tests unitarios de cinemática | ✅ | `tests/detection/test_kinematics.py` |
+| Tests unitarios de validación | ✅ | `tests/detection/test_validation.py` |
+| Tests unitarios de estabilización | ✅ | `tests/detection/test_stabilizer.py` |
 | CLI funcional | ✅ | `drone --help` |
 
 ---
@@ -51,7 +67,7 @@ Sistema para evaluar variables biomecánicas de atletas (postura, velocidad, lon
 |-------|--------|---------|
 | Captura con dron DJI Spark y 20 estudiantes | ⏳ | Pendiente de disponibilidad de video |
 | Registro manual cuadro a cuadro | ⏳ | Plantilla generada por `drone groundtruth` |
-| Comparación automática vs. manual | ✅ | `drone_analysis/analysis/validation.py` |
+| Comparación automática vs. manual | ✅ | `detection/metrics/validation.py` |
 | Cálculo de error absoluto y porcentual | ✅ | `drone validate <results> <ground_truth>` |
 | Criterios ISO/IEC 25010 | ✅ | Bandas EXCELLENT / ACCEPTABLE / LIMIT / UNACCEPTABLE |
 

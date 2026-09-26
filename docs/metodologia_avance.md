@@ -99,7 +99,7 @@ sequenceDiagram
 
 Se utiliza un tablero de **4 marcadores ArUco** ubicados en las esquinas de un rectángulo de referencia de la pista (ancho de carril y 10 m de distancia). `cv2.findHomography` estima la transformación perspectiva entre píxeles y metros. Como respaldo se permite crear una calibración aproximada a partir de un factor `pixels_per_meter` conocido.
 
-Archivo: `drone_analysis/infrastructure/calibration/aruco.py`
+Archivo: `detection/vision/calibration.py`
 
 ## 3.8 Detección y seguimiento del atleta
 
@@ -108,7 +108,7 @@ Archivo: `drone_analysis/infrastructure/calibration/aruco.py`
 - **Selección**: si hay varias personas, se elige la que mejor se solape con la región de salida o la de mayor área.
 - **Pose**: MediaPipe Pose corre dentro del ROI del atleta y las coordenadas se re-escalan al frame original.
 
-Archivos: `drone_analysis/infrastructure/tracking/athlete_tracker.py`, `drone_analysis/infrastructure/pose/detector.py`
+Archivos: `detection/vision/tracker.py`, `detection/vision/pose.py`
 
 ## 3.9 Cálculo de cinemática
 
@@ -119,7 +119,7 @@ Archivos: `drone_analysis/infrastructure/tracking/athlete_tracker.py`, `drone_an
 5. Zancada: distancia horizontal entre contactos consecutivos.
 6. Cadencia: número de contactos / tiempo total.
 
-Archivo: `drone_analysis/analysis/kinematics.py`
+Archivo: `detection/metrics/kinematics.py`
 
 ## 3.10 Validación
 
@@ -130,7 +130,7 @@ Las variables calculadas automáticamente se comparan contra el registro manual 
 - MAPE global
 - Banda de precisión inspirada en ISO/IEC 25010: EXCELLENT (≤5%), ACCEPTABLE (≤10%), LIMIT (≤15%), UNACCEPTABLE (>15%)
 
-Archivo: `drone_analysis/analysis/validation.py`
+Archivo: `detection/metrics/validation.py`
 
 ## 3.11 Herramientas y tecnologías
 

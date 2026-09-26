@@ -6,13 +6,13 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from drone_analysis.domain.models import (
+from detection.entities import (
     BiomechanicalAngles,
     ComparisonResult,
     PoseLandmarks,
     SprintMetrics,
 )
-from drone_analysis.domain.constants import OPTIMAL_ANGLES
+from detection.constants import OPTIMAL_ANGLES
 
 
 class ReferenceComparator:
@@ -30,7 +30,7 @@ class ReferenceComparator:
         # Detect front/rear leg if landmarks provided
         front_leg = "left"
         if landmarks is not None:
-            from drone_analysis.analysis.biomechanics import BiomechanicsAnalyzer
+            from detection.metrics.biomechanics import BiomechanicsAnalyzer
             analyzer = BiomechanicsAnalyzer()
             front_leg, _ = analyzer.detect_front_rear_leg(landmarks)
 

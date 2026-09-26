@@ -14,13 +14,13 @@ from typing import List, Optional
 
 import numpy as np
 
-from drone_analysis.infrastructure.pose.constants import (
+from detection.vision.pose_constants import (
     MIN_KEY_LANDMARKS_VISIBLE,
     MAX_LATERAL_TILT,
     VIEW_MIN_VISIBILITY,
 )
-from drone_analysis.infrastructure.pose import landmarks as lm
-from drone_analysis.infrastructure.pose.view_detection import ViewType, ViewResult
+from detection.vision import landmarks as lm
+from detection.vision.view_detection import ViewType, ViewResult
 
 
 # Landmarks esenciales para mediciones corporales
@@ -133,7 +133,7 @@ def validate_pose(
             )
 
     # --- 4. Tipo de vista ---
-    from drone_analysis.infrastructure.pose.view_detection import detect_view
+    from detection.vision.view_detection import detect_view
     view = detect_view(landmarks)
     result.view = view
 

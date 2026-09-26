@@ -1,14 +1,12 @@
-# Software de Análisis de Video por Drones Autónomos
-# Pipeline: Computer Vision + ArUco + YOLOv8 + MediaPipe
-
-opencv-contrib-python>=4.8.0
-mediapipe>=0.10.14
-numpy<2
-ultralytics>=8.0
-scipy>=1.10
-lapx>=0.5
-pandas>=2.0
-scikit-learn>=1.3
-joblib>=1.3
-pytest>=8.0
-pytest-cov>=4.0
+# Dependencias del proyecto.
+#
+# La fuente de verdad es pyproject.toml. Este archivo se mantiene como atajo
+# para entornos que esperan un requirements.txt.
+#
+#   Solo la librería + tests:      pip install -r requirements.txt
+#   + backend HTTP (FastAPI):      pip install -r requirements.txt --extra backend
+#
+# Equivalente a:
+#   pip install -e ".[dev]"
+#   pip install -e ".[dev,backend]"
+-e .[dev]

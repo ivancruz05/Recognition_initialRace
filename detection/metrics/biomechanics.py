@@ -6,13 +6,13 @@ from typing import Dict, List, Tuple, Optional
 
 import numpy as np
 
-from drone_analysis.domain.models import (
+from detection.entities import (
     BiomechanicalAngles,
     LandmarkIndex,
     PoseLandmarks,
     SprintMetrics,
 )
-from drone_analysis.domain.constants import OPTIMAL_ANGLES
+from detection.constants import OPTIMAL_ANGLES
 
 
 class BiomechanicsAnalyzer:

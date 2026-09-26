@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from drone_analysis.ml.synthetic import SyntheticDatasetConfig, SyntheticDatasetGenerator
-from drone_analysis.ml.trainer import load_model, train_baseline
+from training.synthetic import SyntheticDatasetConfig, SyntheticDatasetGenerator
+from training.trainer import load_model, train_baseline
 
 
 def _generate(tmp_path: Path, n_athletes: int = 40):

@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from drone_analysis.infrastructure.pose.geometry import (
+from detection.vision.geometry import (
     angle_at,
     estimate_all_distances,
     estimate_joint_angles,

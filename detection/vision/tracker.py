@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
-from drone_analysis.domain.models import TrackingResult
+from detection.entities import TrackingResult
 
 
 class TrackerError(Exception):

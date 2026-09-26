@@ -6,10 +6,11 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 
-from drone_analysis.domain.models import BodyMeasurements, DepthFrame, PoseLandmarks
+from detection.entities import BodyMeasurements, DepthFrame, PoseLandmarks
+from detection.interfaces import BodyMeasurementInterface
 
 
-class BodyMeasurementAnalyzer:
+class BodyMeasurementAnalyzer(BodyMeasurementInterface):
     """Measure body dimensions from pose landmarks and optional LiDAR depth."""
 
     BODY_PROPORTIONS = {

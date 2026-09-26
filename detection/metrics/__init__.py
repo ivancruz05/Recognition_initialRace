@@ -1,13 +1,17 @@
-"""Analysis layer - Biomechanical analysis and ML."""
+"""Pure biomechanical math - no I/O, no cv2, no mediapipe."""
 
-from drone_analysis.analysis.biomechanics import BiomechanicsAnalyzer
-from drone_analysis.analysis.comparison import ReferenceComparator
-from drone_analysis.analysis.measurements import BodyMeasurementAnalyzer
-from drone_analysis.analysis.ml import MLAnalyzer
+from detection.metrics.biomechanics import BiomechanicsAnalyzer
+from detection.metrics.comparison import ReferenceComparator
+from detection.metrics.kinematics import KinematicsAnalyzer
+from detection.metrics.measurements import BodyMeasurementAnalyzer
+from detection.metrics.ml_features import MLAnalyzer
+from detection.metrics.validation import ValidationAnalyzer
 
 __all__ = [
     "BiomechanicsAnalyzer",
-    "ReferenceComparator",
     "BodyMeasurementAnalyzer",
+    "KinematicsAnalyzer",
     "MLAnalyzer",
+    "ReferenceComparator",
+    "ValidationAnalyzer",
 ]

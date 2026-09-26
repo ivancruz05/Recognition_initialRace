@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple
 
 import cv2
 
-from drone_analysis.domain.models import VideoInfo
+from detection.entities import VideoInfo
 
 
 class CameraManager:

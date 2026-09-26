@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from drone_analysis.ml.model import SprintMLConfig, SprintMLModel
-from drone_analysis.ml.synthetic import SyntheticDatasetConfig, SyntheticDatasetGenerator
+from training.model import SprintMLConfig, SprintMLModel
+from training.synthetic import SyntheticDatasetConfig, SyntheticDatasetGenerator
 
 
 def _fit_model(tmp_path):

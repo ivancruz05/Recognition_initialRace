@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from drone_analysis.domain.models import BiomechanicalAngles, SprintMetrics
+from detection.entities import BiomechanicalAngles, SprintMetrics
 
 
 @dataclass

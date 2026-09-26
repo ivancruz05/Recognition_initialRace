@@ -10,13 +10,14 @@ from typing import Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from drone_analysis.analysis.biomechanics import BiomechanicsAnalyzer
-from drone_analysis.analysis.kinematics import KinematicsAnalyzer
-from drone_analysis.domain.models import KinematicsResult, PoseLandmarks, TrackingResult
-from drone_analysis.infrastructure.calibration.aruco import ArUcoCalibration
-from drone_analysis.infrastructure.pose.detector import PoseDetector
-from drone_analysis.infrastructure.tracking.athlete_tracker import AthleteTracker, crop_bbox
-from drone_analysis.infrastructure.video.stabilizer import VideoStabilizer
+from detection.interfaces import PoseDetectorInterface
+from detection.metrics.biomechanics import BiomechanicsAnalyzer
+from detection.metrics.kinematics import KinematicsAnalyzer
+from detection.entities import KinematicsResult, PoseLandmarks, TrackingResult
+from detection.vision.calibration import ArUcoCalibration
+from detection.vision.pose import PoseDetector
+from detection.vision.tracker import AthleteTracker, crop_bbox
+from detection.vision.stabilizer import VideoStabilizer
 
 
 @dataclass
@@ -55,12 +56,19 @@ class DroneAnalyzer:
         self,
         calibration: ArUcoCalibration,
         config: Optional[DroneAnalysisConfig] = None,
+        pose_detector: Optional[PoseDetectorInterface] = None,
+        tracker: Optional[AthleteTracker] = None,
     ):
+        """Build the analyzer.
+
+        pose_detector and tracker are injectable so callers (notably the HTTP
+        backend) can supply fakes and run without loading YOLO or MediaPipe.
+        """
         self.calibration = calibration
         self.config = config or DroneAnalysisConfig()
-        self.pose_detector = PoseDetector(model_complexity=2)
+        self.pose_detector = pose_detector or PoseDetector(model_complexity=2)
         self.biomechanics = BiomechanicsAnalyzer()
-        self.tracker = AthleteTracker(
+        self.tracker = tracker or AthleteTracker(
             model_name=self.config.yolo_model,
             tracker=self.config.tracker,
             confidence_threshold=self.config.detection_confidence,

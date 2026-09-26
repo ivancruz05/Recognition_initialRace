@@ -14,8 +14,17 @@ except ImportError:
     mp = None
     MP_AVAILABLE = False
 
-from drone_analysis.domain.interfaces import PoseDetectorInterface
-from drone_analysis.domain.models import Landmark3D, PoseLandmarks
+from detection.interfaces import PoseDetectorInterface
+from detection.entities import Landmark3D, PoseLandmarks
+
+
+def landmarks_to_array(landmarks: PoseLandmarks) -> np.ndarray:
+    """Convert PoseLandmarks into the (33, 4) array the pose validators expect."""
+    arr = np.zeros((33, 4))
+    for idx, lm in landmarks.landmarks.items():
+        if idx < 33:
+            arr[idx] = [lm.x, lm.y, lm.z, lm.visibility]
+    return arr
 
 
 class PoseDetector(PoseDetectorInterface):

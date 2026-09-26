@@ -30,12 +30,20 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
 ]
+backend = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "python-multipart>=0.0.9",
+]
 
 [project.scripts]
-drone = "drone_analysis.cli.main:cli"
+drone = "cli:cli"
+
+[tool.setuptools]
+py-modules = ["cli"]
 
 [tool.setuptools.packages.find]
-include = ["drone_analysis*"]
+include = ["detection*", "training*", "backend*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

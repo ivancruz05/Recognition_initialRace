@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from drone_analysis.infrastructure.calibration.aruco import (
+from detection.vision.calibration import (
     ArUcoCalibration,
     CalibrationError,
     default_track_marker_config,

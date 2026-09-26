@@ -5,8 +5,14 @@ __pycache__/
 *.log
 .pytest_cache/
 
+# Build artifacts
+*.egg-info/
+build/
+dist/
+
 # Model weights downloaded at runtime
 *.pt
+*.task
 
 # Large local datasets
 data/athletes/*/

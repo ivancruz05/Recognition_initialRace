@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from drone_analysis.infrastructure.video.stabilizer import VideoStabilizer
+from detection.vision.stabilizer import VideoStabilizer
 
 
 def test_stabilizer_compensates_translation():
