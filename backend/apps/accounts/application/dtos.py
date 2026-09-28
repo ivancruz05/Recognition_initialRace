@@ -23,7 +23,6 @@ class RegisterInput:
 class AuthOutput:
     id: int
     email: str
-    password: str
     first_name: str
     last_name: str
     user_type: str

@@ -59,7 +59,7 @@ class UserAccount:
 
     @staticmethod
     def _validate_userType(value: str) -> None:
-        if value not in USER_TYPES:
+        if not isinstance(value, str) or value not in USER_TYPES:
             raise InvalidAccountData(
                 f"user_type must be one of {sorted(USER_TYPES)}", field="user_type"
             )

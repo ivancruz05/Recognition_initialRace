@@ -10,7 +10,7 @@ class Login:
     def __init__(self, repository: UserRepository) -> None:
         self._repository = repository  # el puerto, no django
 
-    def executate(self, data: LoginInput) -> AuthOutput:
+    def execute(self, data: LoginInput) -> AuthOutput:
         user = self._repository.verify_credentials(
             data.email, data.password
         )  # -> InvalidCredentials
@@ -23,7 +23,7 @@ class Register:
     def __init__(self, repository: UserRepository) -> None:
         self._repository = repository
 
-    def executate(self, data: RegisterInput) -> AuthOutput:
+    def execute(self, data: RegisterInput) -> AuthOutput:
         if self._repository.exists_by_email(data.email):
             raise EmailAlreadyRegistered(data.email)
 
@@ -45,6 +45,6 @@ class GetMe:
     def __init__(self, repository: UserRepository) -> None:
         self._repository = repository
 
-    def executate(self, user_id: int) -> AuthOutput:
+    def execute(self, user_id: int) -> AuthOutput:
         user = self._repository.get_by_id(user_id)
         return AuthOutput.from_entity(user)

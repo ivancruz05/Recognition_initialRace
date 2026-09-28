@@ -1,1 +1,4 @@
 .venv/
+
+# Agent IA
+.opencode/

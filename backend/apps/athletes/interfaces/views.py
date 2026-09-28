@@ -95,15 +95,11 @@ class AthleteViewSet(viewsets.ViewSet):
         try:
             athlete_id = int(pk)
         except (TypeError, ValueError):
-            return Response(
-                {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
         try:
             output = self._get_athlete.execute(athlete_id)
         except AthleteNotFound as exc:
-            return Response(
-                {"detail": str(exc)}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"detail": str(exc)}, status=status.HTTP_404_NOT_FOUND)
         return Response(
             AthleteSerializer().to_representation(output),
             status=status.HTTP_200_OK,
