@@ -1,4 +1,10 @@
 .venv/
+env/
+__pycache__/
+*.py[cod]
+*.log
+.pytest_cache/
+.opencode/
 
 # Agent IA
 .opencode/
