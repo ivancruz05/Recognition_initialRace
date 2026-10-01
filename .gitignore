@@ -6,12 +6,5 @@ __pycache__/
 .pytest_cache/
 .opencode/
 
-# Model weights downloaded at runtime
-*.pt
-
-# Large local datasets
-data/athletes/*/
-data/r3d_extracted/
-
-# IDE
-.idea/
+# Agent IA
+.opencode/
