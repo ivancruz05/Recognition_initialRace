@@ -14,12 +14,15 @@ consumer). Delete them if that work is abandoned:
     VideoParserInterface
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Optional, Protocol, Tuple, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
 from detection.entities import (
+    BodyMeasurements,
     DepthFrame,
     PoseLandmarks,
     VideoInfo,
@@ -30,12 +33,12 @@ class PoseDetectorInterface(ABC):
     """Interface for pose detection implementations."""
 
     @abstractmethod
-    def detect(self, image: np.ndarray) -> Optional[PoseLandmarks]:
+    def detect(self, image: np.ndarray) -> PoseLandmarks | None:
         """Detect pose landmarks in an RGB image."""
         ...
 
     @abstractmethod
-    def detect_from_bgr(self, image: np.ndarray) -> Optional[PoseLandmarks]:
+    def detect_from_bgr(self, image: np.ndarray) -> PoseLandmarks | None:
         """Detect pose landmarks in a BGR image."""
         ...
 
@@ -43,8 +46,8 @@ class PoseDetectorInterface(ABC):
     def detect_in_roi(
         self,
         image_bgr: np.ndarray,
-        bbox: Tuple[int, int, int, int],
-    ) -> Optional[PoseLandmarks]:
+        bbox: tuple[int, int, int, int],
+    ) -> PoseLandmarks | None:
         """Detect pose inside a bounding box, mapping landmarks back to the full frame.
 
         Args:
@@ -58,7 +61,7 @@ class DepthProviderInterface(ABC):
     """Interface for depth data providers."""
 
     @abstractmethod
-    def get_frame(self, index: int) -> Optional[DepthFrame]:
+    def get_frame(self, index: int) -> DepthFrame | None:
         """Get depth frame at given index."""
         ...
 
@@ -77,7 +80,7 @@ class VideoParserInterface(ABC):
         ...
 
     @abstractmethod
-    def get_frame(self, index: int) -> Optional[DepthFrame]:
+    def get_frame(self, index: int) -> DepthFrame | None:
         """Get frame with RGB and optional depth data."""
         ...
 
@@ -89,9 +92,9 @@ class BodyMeasurementInterface(ABC):
     def measure(
         self,
         landmarks: PoseLandmarks,
-        depth_frame: Optional[DepthFrame] = None,
-        known_height_cm: Optional[float] = None,
-        image_shape: Optional[Tuple[int, int]] = None,
+        depth_frame: DepthFrame | None = None,
+        known_height_cm: float | None = None,
+        image_shape: tuple[int, int] | None = None,
     ) -> "BodyMeasurements":
         """Measure body dimensions from landmarks and optional depth.
 

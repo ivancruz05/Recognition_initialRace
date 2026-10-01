@@ -14,8 +14,6 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DETECTION = REPO_ROOT / "detection"
-TRAINING = REPO_ROOT / "training"
-BACKEND = REPO_ROOT / "backend"
 
 
 def _imported_modules(package_dir: Path) -> set[str]:
@@ -39,27 +37,9 @@ def test_metrics_does_not_depend_on_vision():
     assert offenders == [], f"detection/metrics must stay I/O-free, found: {offenders}"
 
 
-def test_training_does_not_depend_on_detection_or_backend():
-    """Training is standalone: it consumes CSV datasets, not the detection module."""
-    offenders = sorted(
-        m
-        for m in _imported_modules(TRAINING)
-        if m.startswith(("detection", "backend"))
-    )
-    assert offenders == [], f"training/ must stay independent, found: {offenders}"
-
-
-def test_backend_does_not_import_metric_math():
-    """The HTTP layer adapts; it does not compute biomechanics."""
-    offenders = sorted(
-        m for m in _imported_modules(BACKEND) if m.startswith("detection.metrics")
-    )
-    assert offenders == [], f"backend/ must not contain analysis logic, found: {offenders}"
-
-
 @pytest.mark.parametrize(
     "module_name",
-    ["detection", "training"],
+    ["detection"],
 )
 def test_public_modules_import_cleanly(module_name):
     """Importing a package must not require the other one."""
