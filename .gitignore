@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *.log
 .pytest_cache/
+.opencode/
 
 # Model weights downloaded at runtime
 *.pt
