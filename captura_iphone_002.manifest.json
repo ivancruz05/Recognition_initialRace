@@ -1,0 +1,23 @@
+{
+  "athlete_id": "atleta-001",
+  "capture_metadata": {
+    "camera_height_cm": 100.0,
+    "camera_index": 1,
+    "capture_source": "live_camera",
+    "expected_view": "lateral",
+    "source_reference": "captura_iphone_002.mp4"
+  },
+  "error_message": null,
+  "error_type": null,
+  "finished_at_utc": "2026-10-07T20:44:31.293256Z",
+  "frames_written": 0,
+  "output_csv": "captura_iphone_002.csv",
+  "pose_detected": 0,
+  "pose_ready": 0,
+  "raw_mp4": "captura_iphone_002.mp4",
+  "raw_video_frames_written": 0,
+  "session_id": "session-b43a9f16c27243c7b8e995e1d943c5bb",
+  "source_reference": "captura_iphone_002.mp4",
+  "started_at_utc": "2026-10-07T20:44:26.605408Z",
+  "status": "empty"
+}
