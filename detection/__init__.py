@@ -1,63 +1,51 @@
-"""Detection module - everything that turns drone video into biomechanical metrics.
+"""Local single-athlete pose recognition with per-frame CSV results.
 
-Layout:
-    entities.py    core dataclasses (no I/O)
-    constants.py   landmark tables and reference proportions
-    interfaces.py  abstract contracts for swappable adapters
-    metrics/       pure biomechanical math (no I/O)
-    vision/        adapters that touch cv2 / mediapipe / ultralytics
-    pipeline.py    end-to-end orchestration
-    service.py     analysis + measurement orchestration
-    pipelines.py   specialised pipelines (measurements, pose quality)
-    cli.py         click commands
+The package is organized into a pure domain, application session use case,
+OpenCV/MediaPipe infrastructure adapters, and ``python -m detection`` CLI.
 """
 
-from detection.entities import (
-    AnalysisReport,
+from detection.application import (
+    RecognitionSessionProcessor,
+    SessionProcessingRequest,
+    SessionProcessingResult,
+    SessionProcessorState,
+)
+from detection.domain import (
     BiomechanicalAngles,
-    BodyMeasurements,
-    ComparisonResult,
-    DepthFrame,
-    KinematicsResult,
-    Landmark3D,
-    PoseLandmarks,
-    SprintMetrics,
-    TrackingResult,
-    VideoInfo,
-)
-from detection.constants import (
-    BODY_PROPORTIONS,
-    CONNECTIONS,
-    LANDMARKS,
-    OPTIMAL_ANGLES,
-)
-from detection.interfaces import (
-    BodyMeasurementInterface,
-    DepthProviderInterface,
-    PoseDetectorInterface,
-    VideoParserInterface,
+    BiomechanicalFrameResult,
+    BiomechanicalAnalyzer,
+    CapturedFrame,
+    DomainInvariantError,
+    FrameResultWriter,
+    FrameSource,
+    PoseLandmark2D,
+    PoseLandmarkName,
+    RecognitionSession,
+    calculate_angle_at,
+    calculate_biomechanical_angles,
 )
 
 __version__ = "1.0.0"
 
 __all__ = [
-    "AnalysisReport",
     "BiomechanicalAngles",
-    "BODY_PROPORTIONS",
-    "BodyMeasurementInterface",
-    "BodyMeasurements",
-    "CONNECTIONS",
-    "ComparisonResult",
-    "DepthFrame",
-    "DepthProviderInterface",
-    "KinematicsResult",
-    "LANDMARKS",
-    "Landmark3D",
-    "OPTIMAL_ANGLES",
-    "PoseDetectorInterface",
-    "PoseLandmarks",
-    "SprintMetrics",
-    "TrackingResult",
-    "VideoInfo",
-    "VideoParserInterface",
+    "BiomechanicalAnalyzer",
+    "BiomechanicalFrameResult",
+    "CapturedFrame",
+    "DomainInvariantError",
+    "FrameResultWriter",
+    "FrameSource",
+    "PoseLandmark2D",
+    "PoseLandmarkName",
+    "RecognitionSession",
+    "RecognitionSessionProcessor",
+    "SessionProcessingRequest",
+    "SessionProcessingResult",
+    "SessionProcessorState",
+    "calculate_angle_at",
+    "calculate_biomechanical_angles",
 ]
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))

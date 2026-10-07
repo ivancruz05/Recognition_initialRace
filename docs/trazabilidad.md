@@ -1,77 +1,61 @@
-# Trazabilidad: Documento DRON ↔ Código
+# Trazabilidad del reconocimiento local
 
-Este documento vincula cada requisito del **DOCUMENTO DRON** con el módulo de código que lo implementa. Sirve como insumo para completar el documento formal de la monografía.
+Este documento relaciona el flujo vigente de captura/análisis con su implementación.
+El MVP usa una cámara lateral de iPhone conectada al Mac mediante Continuity Camera
+o un archivo MP4/MOV. Se procesa un atleta por sesión con un código manual; no se
+identifica automáticamente a la persona.
 
-## Requisitos generales
+## Flujo y módulos
 
-| Requisito del documento | Módulo(s) | Estado |
-|---|---|---|
-| Software de análisis de video | `detection/`, `training/`, `backend/` | ✅ |
-| Dron autónomo DJI Spark | CLI `drone analyze` acepta video `.mp4` de cualquier fuente | ✅ |
-| Carrera de 10 m con salida de tacos | Configuración por defecto de calibración ArUco (10 m) | ✅ |
-| 20 estudiantes grupo piloto | `data/pilot/` (pendiente captura) | ⏳ |
-
-## Variables biomecánicas
-
-| Variable | Definición en código | Archivo principal |
-|---|---|---|
-| Postura | Score de calidad + ángulo de tronco | `detection/metrics/biomechanics.py` |
-| Velocidad | Velocidad instantánea, máxima y media del centro de cadera | `detection/metrics/kinematics.py` |
-| Longitud de zancada | Distancia entre contactos de pie consecutivos | `detection/metrics/kinematics.py` |
-| Cadencia | Pasos por segundo a partir de eventos de contacto | `detection/metrics/kinematics.py` |
-
-## Pipeline del documento (sección 3.3.1)
-
-| Etapa del pipeline | Implementación | Archivo(s) |
-|---|---|---|
-| Estabilización del video | `VideoStabilizer` (optical flow + homografía) | `detection/vision/stabilizer.py` |
-| Detección y seguimiento del atleta | `AthleteTracker` (YOLOv8 + ByteTrack) | `detection/vision/tracker.py` |
-| Transformación px→m con marcadores | `ArUcoCalibration` + `default_track_marker_config` | `detection/vision/calibration.py` |
-| Estimación de pose | `PoseDetector` (MediaPipe) con `detect_in_roi` | `detection/vision/pose.py` |
-| Cálculo de variables cinemáticas | `KinematicsAnalyzer` | `detection/metrics/kinematics.py` |
-
-## Validación (secciones 3.3.2, 3.3.3, 3.5)
-
-| Requisito | Implementación | Archivo(s) |
-|---|---|---|
-| Registro manual de referencia cuadro a cuadro | Plantilla JSON generada por CLI | `detection/cli.py` |
-| Comparación automática vs. manual | `ValidationAnalyzer` | `detection/metrics/validation.py` |
-| Error absoluto y porcentual | Cálculo por variable + MAPE | `detection/metrics/validation.py` |
-| Criterios ISO/IEC 25010 | Bandas EXCELLENT / ACCEPTABLE / LIMIT / UNACCEPTABLE | `detection/metrics/validation.py` |
-
-## Interfaz de usuario
-
-| Comando | Propósito | Archivo |
-|---|---|---|
-| `drone calibrate` | Generar calibración px→m | `detection/cli.py` |
-| `drone analyze` | Ejecutar el pipeline completo | `detection/cli.py` |
-| `drone annotate` | Generar video anotado | `detection/cli.py` |
-| `drone groundtruth` | Crear plantilla de anotación manual | `detection/cli.py` |
-| `drone validate` | Comparar resultados vs. ground truth | `detection/cli.py` |
-
-## Tests
-
-| Componente probado | Archivo de test |
+| Etapa | Implementación |
 |---|---|
-| Calibración ArUco | `tests/detection/test_calibration.py` |
-| Tracking / crop | `tests/detection/test_tracker.py` |
-| Cinemática | `tests/detection/test_kinematics.py` |
-| Validación | `tests/detection/test_validation.py` |
-| Estabilización | `tests/detection/test_stabilizer.py` |
-| Geometría de landmarks | `tests/test_measurements.py` |
+| Vista previa, overlay y gate de pose lista | `detection/infrastructure/camera_source.py`, `detection/domain/entities.py` |
+| Captura manual y video original MP4 | `detection/infrastructure/camera_source.py`, `detection/infrastructure/raw_video_writer.py` |
+| Lectura alternativa de video | `detection/infrastructure/video_file_source.py` |
+| Orquestación de una sesión | `detection/application/process_session.py` |
+| Detección de pose | `detection/infrastructure/mediapipe_pose_detector.py` |
+| Análisis de ángulos por frame | `detection/infrastructure/mediapipe_analyzer.py`, `detection/domain/angle_calculation.py` |
+| Escritura incremental de ángulos + landmarks/confianza | `detection/infrastructure/csv_result_writer.py` |
+| Estado y conteos de archivos CSV/MP4 | `detection/infrastructure/session_manifest_writer.py` |
+| Comandos de usuario | `detection/local_cli.py`, `detection/__main__.py` |
 
-## Elementos pendientes en el documento formal
+## Entrada, proceso y salida
 
-Las siguientes secciones del `.docx` aún contienen texto de plantilla y deben ser completados por las autoras:
+En captura en vivo se muestra una vista previa con puntos y conexiones. `t` solo
+inicia tras cinco frames consecutivos con suficientes ángulos de miembro
+inferior; `s` finaliza y `q` detiene. La preparación no certifica la vista lateral.
+El ID del atleta es manual y la sesión se genera si se omite. En vivo se conserva
+un MP4 BGR sin anotaciones, desde el instante de inicio, junto al CSV y un
+manifiesto JSON de estado. Los archivos existentes no se sobrescriben. También
+se puede analizar un MP4/MOV ya grabado, que produce CSV y manifiesto mientras el
+original se conserva.
 
-- Sección **3.4** (falta en el cuerpo del documento).
-- **Tabla 3.4** técnicas e instrumentos (celdas vacías).
-- **1.5.2 Preguntas específicas** (aparece en TOC pero no en cuerpo).
-- **Conclusiones**, **Recomendaciones**, **Figuras**, **Tablas**, **Apéndices**.
+Los resultados incluyen índices y tiempos de frame, detección/listura de pose,
+visibilidad y coordenadas x/y normalizadas de landmarks, además de ángulos
+disponibles de rodillas, caderas, tobillos y tronco. Valores no disponibles quedan
+vacíos. No hay coordenadas métricas ni etiquetas humanas para entrenamiento aún.
+`frame_index` es la clave de unión CSV↔MP4; la duración del MP4 a tasa constante
+solo aproxima los timestamps monotónicos del CSV. El manifiesto `complete` solo se
+marca tras cerrar las salidas y, cuando se genera MP4, reabrirlo y decodificarlo;
+el conteo decodificado debe coincidir con las escrituras de frames aceptadas.
+`empty` representa cualquier sesión cerrada correctamente sin frames, tanto una
+captura cancelada antes de `t` como un archivo sin frames. `failed` puede conservar
+salidas parciales. Si una caída o interrupción deja `in_progress` persistente, el
+intento es incompleto y no debe usarse hasta revisión. El usuario debe revisar los
+manifiestos antes de incorporar intentos al dataset.
 
-## Notas para las autoras
+## Límites del MVP
 
-1. El **DOCUMENTO DRON** es la fuente de verdad del proyecto.
-2. El código refleja exactamente el alcance del documento: 4 variables, dron, 10 m, validación con 20 estudiantes.
-3. Los videos de dron aún no están disponibles en el repositorio; cuando lleguen deben copiarse a `data/drone/<sesion>/`.
-4. Para la validación de campo se debe usar `drone groundtruth` para generar la plantilla, completarla manualmente y luego `drone validate`.
+La medición es angular y bidimensional. No incluye calibración métrica, velocidad,
+distancia, longitud de zancada ni cadencia. Tampoco incluye app móvil, Django,
+dron, LiDAR, YOLO, estabilización, ArUco ni modelos o métricas ML legacy.
+
+## Pruebas
+
+La cobertura actual está en `tests/detection/test_recognition_domain.py`,
+`test_recognition_application.py`, `test_recognition_infrastructure.py`,
+`test_local_cli.py` y `test_layering.py`. Ejecución desde la raíz:
+
+```bash
+.venv/bin/python -m pytest -q
+```

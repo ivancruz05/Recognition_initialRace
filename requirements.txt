@@ -1,0 +1,8 @@
+# Recognition MVP runtime dependencies (tested with Python 3.9.6)
+click==8.1.8
+mediapipe==0.10.21
+numpy==1.26.4
+opencv-contrib-python==4.11.0.86
+
+# Test dependency
+pytest==8.4.2
