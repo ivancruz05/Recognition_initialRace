@@ -1,0 +1,23 @@
+{
+  "athlete_id": "atleta-pendiente",
+  "capture_metadata": {
+    "camera_height_cm": 100.0,
+    "camera_index": "",
+    "capture_source": "video_file",
+    "expected_view": "lateral",
+    "source_reference": "Intento_007.MOV"
+  },
+  "error_message": null,
+  "error_type": null,
+  "finished_at_utc": "2026-10-08T04:10:29.515804Z",
+  "frames_written": 963,
+  "output_csv": "/Users/santiagovasquezfranco/PycharmProjects/Recognition_initialRace/ingesta_Intento_007.csv",
+  "pose_detected": 826,
+  "pose_ready": 826,
+  "raw_mp4": null,
+  "raw_video_frames_written": 0,
+  "session_id": "ingesta-Intento_007",
+  "source_reference": "Intento_007.MOV",
+  "started_at_utc": "2026-10-08T04:09:20.599265Z",
+  "status": "complete"
+}
