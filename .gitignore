@@ -9,5 +9,10 @@ __pycache__/
 .opencode/
 
 #videos no se suben por integridad de las personas grabadas
-src/films/
 *.mp4
+
+# Datos locales sensibles: conservar solo la estructura y documentación.
+src/data/**/*.MOV
+src/data/**/*.mp4
+src/data/**/*.csv
+src/data/**/*.manifest.json

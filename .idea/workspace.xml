@@ -5,9 +5,54 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1754ae5b-5d69-40e3-931a-1f2745874c81" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/drone-analysis.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/detection/pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/detection/pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_001.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_001.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_002.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_003.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_003.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_004.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_005.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_005.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_006.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_006.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_008.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_iphone_008.manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/captura_iphone_008.manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_v2.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/captura_v3.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_001.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_001.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_002.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_002.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_003.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_003.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_004.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_004.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_005.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_005.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_007.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_007.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_008.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_008.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_009.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_009.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_011.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingesta_Intento_011.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/piloto_Intento_010.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/piloto_Intento_010.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_001.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_001.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_003.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_003.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_005.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_005.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_006.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_006.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_008.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_008.manifest.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,22 +67,22 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "xofranc"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;xofranc&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/xofranc/Recognition_initialRace.git",
-    "accountId": "9d637150-9bb4-4b55-8bf7-3025eeb78599"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/xofranc/Recognition_initialRace.git&quot;,
+    &quot;accountId&quot;: &quot;9d637150-9bb4-4b55-8bf7-3025eeb78599&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="3KIl1RzaPxwdtdaDPq7S835xOWu" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -50,7 +95,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "Body__measurents",
+    "git-widget-placeholder": "master",
     "nodejs_package_manager_path": "npm",
     "python.packages.toolwindow.project.migrated.to.right.top.v2": "true"
   }
