@@ -5,11 +5,15 @@ only infrastructure dependency allowed in ``interfaces/``) and injected
 into the application use cases. Each action delegates to a use case and
 translates its exceptions into HTTP responses.
 
+Endpoints (RBAC: Docente / Administrador):
+    * ``GET    /api/v1/athletes/``            → catálogo para filtros
+    * ``POST   /api/v1/athletes/``            → 201 / 400
+    * ``GET    /api/v1/athletes/{athlete_id}/`` → 200 / 404
+
 Dependency rules (checked by @architecture-reviewer):
     * may import ``rest_framework``, ``..application`` (use cases),
       ``..infrastructure.repositories`` (composition only) and
-      ``..domain.exceptions`` (translation of the two documented
-      failure modes below);
+      ``..domain.exceptions`` (translation of failure modes);
     * must NOT touch ``..infrastructure.models``, the ORM or Django
       models directly.
 """
@@ -20,33 +24,19 @@ from rest_framework import status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from ..application import CreateAthlete, GetAthlete
+from ..application import CreateAthlete, GetAthlete, ListAthletes
 from ..domain.exceptions import AthleteNotFound, InvalidAthleteData
 from ..infrastructure.repositories import DjangoAthleteRepository
+from apps.accounts.interfaces.permissions import IsTeacherOrAdmin
 from .serializers import AthleteSerializer
 
 __all__ = ["AthleteViewSet"]
 
 
 class AthleteViewSet(viewsets.ViewSet):
-    """Create and retrieve athletes.
+    """List, create and retrieve athletes (teacher-facing catalogue)."""
 
-    Implemented actions (and the only routes the router binds):
-
-        * ``create`` → ``POST   /athletes/``        → 201 / 400
-        * ``retrieve`` → ``GET   /athletes/{pk}/`` → 200 / 404
-
-    ``list``, ``update``, ``partial_update`` and ``destroy`` are NOT
-    implemented (out of scope). ``SimpleRouter.get_method_map`` keeps a
-    route as long as *one* of its methods has a handler, therefore:
-
-        * ``POST /athletes/`` is bound (create) while ``GET`` is not →
-          ``GET /athletes/`` → 405;
-        * the detail route binds ``GET`` only → ``PUT`` / ``PATCH`` /
-          ``DELETE /athletes/{pk}/`` → 405.
-
-    Verified with a real smoke test (Django test client), not assumed.
-    """
+    permission_classes = (IsTeacherOrAdmin,)
 
     def __init__(self, **kwargs) -> None:
         """Build the use cases with the concrete repository.
@@ -58,15 +48,24 @@ class AthleteViewSet(viewsets.ViewSet):
         repository = DjangoAthleteRepository()
         self._create_athlete = CreateAthlete(repository)
         self._get_athlete = GetAthlete(repository)
+        self._list_athletes = ListAthletes(repository)
 
     # -- actions -----------------------------------------------------------
+    def list(self, request: Request) -> Response:
+        """``GET /athletes/``: catálogo completo (selector de filtros)."""
+        outputs = self._list_athletes.execute()
+        return Response(
+            [AthleteSerializer().to_representation(output) for output in outputs],
+            status=status.HTTP_200_OK,
+        )
+
     def create(self, request: Request) -> Response:
         """``POST /athletes/``: validate, persist and return the athlete.
 
         Returns:
             201 with the created ``AthleteOutput``, or 400 when the
             serializer rejects the payload (shape/type) or the domain
-            rejects it (``InvalidAthleteData``).
+            rejects it (``InvalidAthleteData``, incl. código duplicado).
         """
         serializer = AthleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -85,19 +84,9 @@ class AthleteViewSet(viewsets.ViewSet):
         )
 
     def retrieve(self, request: Request, pk: str) -> Response:
-        """``GET /athletes/{pk}/``: return one athlete by id.
-
-        Returns:
-            200 with the ``AthleteOutput``; 404 when ``pk`` is not a
-            positive integer or matches no persisted athlete
-            (``AthleteNotFound``).
-        """
+        """``GET /athletes/{athlete_id}/``: one athlete by technical code."""
         try:
-            athlete_id = int(pk)
-        except (TypeError, ValueError):
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            output = self._get_athlete.execute(athlete_id)
+            output = self._get_athlete.execute(pk)
         except AthleteNotFound as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_404_NOT_FOUND)
         return Response(

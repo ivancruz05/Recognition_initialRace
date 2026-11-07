@@ -7,27 +7,30 @@ module allowed to translate between the two.
 
 Layer rules: this module may import Django; it must never import
 ``application/`` or ``interfaces/``.
+
+Table name follows the monograph logical model (``cadi_athlete``).
 """
 
 from django.db import models
 
 
 class Athlete(models.Model):
-    """Database row for a member of the racing team.
+    """Database row for an athlete of the CADI.
 
-    Field types mirror the domain invariants one-to-one
-    (``first_name``/``last_name`` → non-empty strings,
-    ``date_of_birth`` → a calendar date); no extra behaviour is added
-    here, validation of business rules belongs to the domain layer.
+    Field types mirror the domain invariants one-to-one (``athlete_id``
+    is the unique technical code, ``label``/``group`` are optional);
+    no personal document is stored (data minimization, Ley 1581 de 2012).
     """
 
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField()
+    athlete_id = models.CharField(max_length=64, unique=True)
+    label = models.CharField(max_length=120, null=True, blank=True)
+    group = models.CharField(max_length=120, null=True, blank=True)
+    registered_at = models.DateField()
 
     class Meta:
         verbose_name = "athlete"
         verbose_name_plural = "athletes"
+        db_table = "cadi_athlete"
 
     def __str__(self) -> str:
-        return "{0} {1}".format(self.first_name, self.last_name)
+        return self.label or self.athlete_id

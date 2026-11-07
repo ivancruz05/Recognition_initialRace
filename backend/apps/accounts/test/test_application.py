@@ -66,10 +66,32 @@ def test_register_persists_and_returns_public_output():
         email="ada@example.com",
         first_name="Ada",
         last_name="Lovelace",
-        user_type="customer",
+        user_type="student",
     )
     assert "password" not in output.__dataclass_fields__
     assert repository.passwords["ada@example.com"] == "correct-horse-battery"
+
+
+def test_register_passes_the_requested_role_through():
+    # The use case does not force a role: the public endpoint asks for
+    # "student", the admin path may ask for teacher/admin.
+    repository = InMemoryUserRepository()
+
+    output = Register(repository).execute(
+        register_input(email="profe@example.com", user_type="teacher")
+    )
+
+    assert output.user_type == "teacher"
+
+
+def test_auth_output_carries_the_linked_pseudonymous_athlete_id():
+    repository = InMemoryUserRepository()
+    Register(repository).execute(register_input())
+    repository.accounts[1].athlete_id = "ATL-0001"
+
+    output = GetMe(repository).execute(1)
+
+    assert output.athlete_id == "ATL-0001"
 
 
 def test_register_rejects_existing_email():

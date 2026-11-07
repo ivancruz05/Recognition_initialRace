@@ -14,6 +14,7 @@ from apps.athletes.application import (
     CreateAthlete,
     CreateAthleteInput,
     GetAthlete,
+    ListAthletes,
 )
 from apps.athletes.domain import (
     Athlete,
@@ -23,21 +24,23 @@ from apps.athletes.domain import (
     InvalidAthleteData,
 )
 
-VALID_DATE_OF_BIRTH = date(1998, 4, 12)
+VALID_REGISTERED_AT = date(2020, 5, 10)
 
 
 class InMemoryAthleteRepository(AthleteRepository):
     """Fake ``AthleteRepository``: a dict, no Django, no ORM.
 
-    Assigns sequential ids like a datastore would and raises the real
-    domain exceptions so use cases can be tested end to end.
+    Assigns sequential ids like a datastore would, keys rows by the
+    technical code and raises the real domain exceptions so use cases
+    can be tested end to end.
     """
 
     def __init__(self, start_id=1):
         self._rows = {}
+        self._codes = {}
         self._next_id = start_id
         self.added = []
-        self.requested_ids = []
+        self.requested_codes = []
 
     @property
     def rows(self):
@@ -48,14 +51,21 @@ class InMemoryAthleteRepository(AthleteRepository):
         athlete.id = self._next_id
         self._next_id += 1
         self._rows[athlete.id] = athlete
+        self._codes[athlete.athlete_id] = athlete
         return athlete
 
-    def get_by_id(self, athlete_id):
-        self.requested_ids.append(athlete_id)
+    def get_by_athlete_id(self, athlete_id):
+        self.requested_codes.append(athlete_id)
         try:
-            return self._rows[athlete_id]
+            return self._codes[athlete_id]
         except KeyError:
             raise AthleteNotFound(athlete_id)
+
+    def list_all(self):
+        return [
+            self._rows[key]
+            for key in sorted(self._rows, key=lambda i: self._rows[i].athlete_id)
+        ]
 
 
 class UnpersistedRepository(InMemoryAthleteRepository):
@@ -68,9 +78,10 @@ class UnpersistedRepository(InMemoryAthleteRepository):
 
 def valid_input(**overrides):
     payload = {
-        "first_name": "Usain",
-        "last_name": "Bolt",
-        "date_of_birth": VALID_DATE_OF_BIRTH,
+        "athlete_id": "ATL-0001",
+        "label": "Usain B.",
+        "group": "Grupo 1",
+        "registered_at": VALID_REGISTERED_AT,
     }
     payload.update(overrides)
     return CreateAthleteInput(**payload)
@@ -87,9 +98,10 @@ def test_create_athlete_returns_output_with_assigned_id():
 
     assert isinstance(output, AthleteOutput)
     assert output.id == 1
-    assert output.first_name == "Usain"
-    assert output.last_name == "Bolt"
-    assert output.date_of_birth == VALID_DATE_OF_BIRTH
+    assert output.athlete_id == "ATL-0001"
+    assert output.label == "Usain B."
+    assert output.group == "Grupo 1"
+    assert output.registered_at == VALID_REGISTERED_AT
 
 
 def test_create_athlete_persists_exactly_one_record():
@@ -100,7 +112,7 @@ def test_create_athlete_persists_exactly_one_record():
 
     assert len(repository.rows) == 1
     stored = repository.rows[1]
-    assert stored.first_name == "Usain"
+    assert stored.athlete_id == "ATL-0001"
     assert stored.id == 1
 
 
@@ -109,32 +121,41 @@ def test_create_athlete_assigns_sequential_ids():
     use_case = CreateAthlete(repository)
 
     first = use_case.execute(valid_input())
-    second = use_case.execute(valid_input(first_name="Yohan"))
+    second = use_case.execute(valid_input(athlete_id="ATL-0002"))
 
     assert (first.id, second.id) == (1, 2)
+
+
+def test_create_athlete_defaults_registered_at_to_today():
+    repository = InMemoryAthleteRepository()
+    use_case = CreateAthlete(repository)
+
+    output = use_case.execute(valid_input(registered_at=None))
+
+    assert output.registered_at == date.today()
 
 
 def test_create_athlete_propagates_future_date_without_persisting():
     repository = InMemoryAthleteRepository()
     use_case = CreateAthlete(repository)
-    invalid = valid_input(date_of_birth=date.today() + timedelta(days=1))
+    invalid = valid_input(registered_at=date.today() + timedelta(days=1))
 
     with pytest.raises(InvalidAthleteData) as exc_info:
         use_case.execute(invalid)
 
-    assert exc_info.value.field == "date_of_birth"
+    assert exc_info.value.field == "registered_at"
     assert repository.added == []
     assert repository.rows == {}
 
 
-def test_create_athlete_propagates_blank_first_name():
+def test_create_athlete_propagates_blank_code_without_persisting():
     repository = InMemoryAthleteRepository()
     use_case = CreateAthlete(repository)
 
     with pytest.raises(InvalidAthleteData) as exc_info:
-        use_case.execute(valid_input(first_name="   "))
+        use_case.execute(valid_input(athlete_id="   "))
 
-    assert exc_info.value.field == "first_name"
+    assert exc_info.value.field == "athlete_id"
     assert repository.rows == {}
 
 
@@ -169,21 +190,21 @@ def test_get_athlete_returns_the_stored_output():
     repository = InMemoryAthleteRepository()
     created = CreateAthlete(repository).execute(valid_input())
 
-    output = GetAthlete(repository).execute(created.id)
+    output = GetAthlete(repository).execute("ATL-0001")
 
     assert output == created
-    assert repository.requested_ids == [created.id]
+    assert repository.requested_codes == ["ATL-0001"]
 
 
-def test_get_athlete_propagates_not_found_with_athlete_id():
+def test_get_athlete_propagates_not_found_with_the_requested_code():
     repository = InMemoryAthleteRepository()
     use_case = GetAthlete(repository)
 
     with pytest.raises(AthleteNotFound) as exc_info:
-        use_case.execute(999)
+        use_case.execute("ATL-9999")
 
-    assert exc_info.value.athlete_id == 999
-    assert repository.requested_ids == [999]
+    assert exc_info.value.athlete_id == "ATL-9999"
+    assert repository.requested_codes == ["ATL-9999"]
 
 
 def test_get_athlete_uses_its_own_repository_instance():
@@ -191,23 +212,37 @@ def test_get_athlete_uses_its_own_repository_instance():
     empty = InMemoryAthleteRepository()
     CreateAthlete(populated).execute(valid_input())
 
-    output = GetAthlete(populated).execute(1)
+    output = GetAthlete(populated).execute("ATL-0001")
 
     assert output.id == 1
     with pytest.raises(AthleteNotFound) as exc_info:
-        GetAthlete(empty).execute(1)
-    assert exc_info.value.athlete_id == 1
+        GetAthlete(empty).execute("ATL-0001")
+    assert exc_info.value.athlete_id == "ATL-0001"
+
+
+# -- ListAthletes ----------------------------------------------------------
+
+
+def test_list_athletes_returns_empty_list_when_there_are_no_rows():
+    assert ListAthletes(InMemoryAthleteRepository()).execute() == []
+
+
+def test_list_athletes_returns_an_output_per_stored_row():
+    repository = InMemoryAthleteRepository()
+    CreateAthlete(repository).execute(valid_input())
+    CreateAthlete(repository).execute(valid_input(athlete_id="ATL-0002"))
+
+    outputs = ListAthletes(repository).execute()
+
+    assert [output.athlete_id for output in outputs] == ["ATL-0001", "ATL-0002"]
+    assert all(isinstance(output, AthleteOutput) for output in outputs)
 
 
 # -- DTOs ------------------------------------------------------------------
 
 
 def test_athlete_output_from_entity_requires_an_assigned_id():
-    unpersisted = Athlete(
-        first_name="Ada",
-        last_name="Lovelace",
-        date_of_birth=date(1990, 1, 1),
-    )
+    unpersisted = Athlete(athlete_id="ATL-0001")
 
     with pytest.raises(DomainError) as exc_info:
         AthleteOutput.from_entity(unpersisted)
@@ -219,6 +254,6 @@ def test_create_athlete_input_is_frozen():
     data = valid_input()
 
     with pytest.raises(Exception) as exc_info:
-        data.first_name = "changed"
+        data.athlete_id = "changed"
 
     assert type(exc_info.value).__name__ == "FrozenInstanceError"

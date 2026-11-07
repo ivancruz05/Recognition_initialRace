@@ -5,13 +5,26 @@ import pytest
 from apps.accounts.domain import InvalidAccountData, UserAccount
 
 
-def test_valid_account_defaults_to_customer_and_can_have_blank_names():
+def test_valid_account_defaults_to_student_and_can_have_blank_names():
     account = UserAccount(email="ada@example.com", first_name="", last_name="")
 
     assert account.id is None
-    assert account.user_type == "customer"
+    assert account.user_type == "student"
+    assert account.athlete_id is None
     assert account.first_name == ""
     assert account.last_name == ""
+
+
+@pytest.mark.parametrize("user_type", ["admin", "teacher", "student"])
+def test_valid_roles_are_accepted(user_type):
+    account = UserAccount(
+        email="ada@example.com",
+        first_name="Ada",
+        last_name="Lovelace",
+        user_type=user_type,
+    )
+
+    assert account.user_type == user_type
 
 
 @pytest.mark.parametrize("email", ["", "missing-at", "@example.com", "ada@"])
@@ -43,7 +56,7 @@ def test_non_string_name_raises_account_data_error(field_name, overrides):
     assert exc_info.value.field == field_name
 
 
-@pytest.mark.parametrize("user_type", ["operator", None, []])
+@pytest.mark.parametrize("user_type", ["operator", "customer", None, []])
 def test_invalid_user_type_raises_account_data_error(user_type):
     with pytest.raises(InvalidAccountData) as exc_info:
         UserAccount(
@@ -54,6 +67,30 @@ def test_invalid_user_type_raises_account_data_error(user_type):
         )
 
     assert exc_info.value.field == "user_type"
+
+
+@pytest.mark.parametrize("athlete_id", ["", "   ", 123, 0])
+def test_invalid_athlete_id_raises_account_data_error(athlete_id):
+    with pytest.raises(InvalidAccountData) as exc_info:
+        UserAccount(
+            email="ada@example.com",
+            first_name="Ada",
+            last_name="Lovelace",
+            athlete_id=athlete_id,
+        )
+
+    assert exc_info.value.field == "athlete_id"
+
+
+def test_linked_pseudonymous_athlete_id_is_accepted():
+    account = UserAccount(
+        email="ada@example.com",
+        first_name="Ada",
+        last_name="Lovelace",
+        athlete_id="ATL-0001",
+    )
+
+    assert account.athlete_id == "ATL-0001"
 
 
 @pytest.mark.parametrize("account_id", [0, -1, True, "1"])

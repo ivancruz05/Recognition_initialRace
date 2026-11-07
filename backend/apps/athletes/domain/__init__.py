@@ -5,7 +5,7 @@ application/, infrastructure/ or interfaces/). The re-exports below are
 safe: they only reference modules of this same layer.
 """
 
-from .entities import Athlete
+from .entities import MAX_CODE_LENGTH, MAX_LABEL_LENGTH, Athlete
 from .exceptions import AthleteNotFound, DomainError, InvalidAthleteData
 from .repositories import AthleteRepository
 
@@ -15,4 +15,6 @@ __all__ = [
     "DomainError",
     "InvalidAthleteData",
     "AthleteNotFound",
+    "MAX_CODE_LENGTH",
+    "MAX_LABEL_LENGTH",
 ]

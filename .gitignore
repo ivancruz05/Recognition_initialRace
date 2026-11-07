@@ -11,8 +11,11 @@ __pycache__/
 #videos no se suben por integridad de las personas grabadas
 *.mp4
 
-# Datos locales sensibles: conservar solo la estructura y documentación.
-src/data/**/*.MOV
-src/data/**/*.mp4
-src/data/**/*.csv
-src/data/**/*.manifest.json
+# Export de la base remota: contiene datos personales de atletas. No versionar.
+data_export/
+
+# Frontend (Next.js)
+node_modules/
+frontend/.next/
+frontend/out/
+.env*.local

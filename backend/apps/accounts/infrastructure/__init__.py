@@ -1,4 +1,4 @@
 from .repositories import DjangoUserRepository
-from .session import login_user, logout_user
+from .jwt import blacklist_refresh_token, issue_tokens
 
-__all__ = ["DjangoUserRepository", "login_user", "logout_user"]
+__all__ = ["DjangoUserRepository", "issue_tokens", "blacklist_refresh_token"]

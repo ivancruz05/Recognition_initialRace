@@ -26,68 +26,51 @@ class AthleteSerializer(serializers.Serializer):
     """Validate a create-athlete payload / render an ``AthleteOutput``.
 
     Inbound (``is_valid`` → ``to_application_input``): JSON body with
-    ``first_name``, ``last_name`` and ``date_of_birth``.
+    ``athlete_id`` (obligatorio) y ``label`` / ``group`` /
+    ``registered_at`` (opcionales).
     Outbound (``to_representation``): an ``AthleteOutput`` DTO.
     """
 
     id = serializers.IntegerField(read_only=True)
-    first_name = serializers.CharField(
+    athlete_id = serializers.CharField(
         required=True,
         allow_null=False,
         allow_blank=False,
         trim_whitespace=True,
+        max_length=64,
     )
-    last_name = serializers.CharField(
-        required=True,
-        allow_null=False,
+    label = serializers.CharField(
+        required=False,
+        allow_null=True,
         allow_blank=False,
-        trim_whitespace=True,
+        max_length=120,
+        default=None,
     )
-    date_of_birth = serializers.DateField(required=True)
-
-    # -- shape-level validation (not business rules) ----------------------
-    def validate_first_name(self, value: str) -> str:
-        """Reject empty / whitespace-only ``first_name``.
-
-        Mirrors nothing but the input shape: the domain keeps the final
-        say (it may reject other values the serializer accepts).
-        """
-        if not value.strip():
-            raise serializers.ValidationError("first_name must not be empty.")
-        return value
-
-    def validate_last_name(self, value: str) -> str:
-        """Reject empty / whitespace-only ``last_name``."""
-        if not value.strip():
-            raise serializers.ValidationError("last_name must not be empty.")
-        return value
+    group = serializers.CharField(
+        required=False,
+        allow_null=True,
+        allow_blank=False,
+        max_length=120,
+        default=None,
+    )
+    registered_at = serializers.DateField(required=False, allow_null=True, default=None)
 
     # -- mapping helpers ---------------------------------------------------
     def to_application_input(self, validated_data: dict) -> CreateAthleteInput:
         """Map the validated payload to the application input DTO.
 
-        Args:
-            validated_data: result of a successful ``is_valid()`` call.
-
-        Returns:
-            A frozen :class:`CreateAthleteInput` ready for the
-            ``CreateAthlete`` use case.
-
         ``DateField`` already returns a ``datetime.date`` after
         validation; the ``str`` branch is defensive input handling in
         case the payload reaches this method unvalidated.
         """
-        date_of_birth = validated_data["date_of_birth"]
-        if isinstance(date_of_birth, str):
-            date_of_birth = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
-        if not isinstance(date_of_birth, date):  # pragma: no cover - defensive
-            raise serializers.ValidationError(
-                {"date_of_birth": "Expected a date in YYYY-MM-DD format."}
-            )
+        registered_at = validated_data.get("registered_at")
+        if isinstance(registered_at, str):
+            registered_at = datetime.strptime(registered_at, "%Y-%m-%d").date()
         return CreateAthleteInput(
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-            date_of_birth=date_of_birth,
+            athlete_id=validated_data["athlete_id"],
+            label=validated_data.get("label"),
+            group=validated_data.get("group"),
+            registered_at=registered_at,
         )
 
     def to_representation(self, output: AthleteOutput) -> dict:
@@ -95,12 +78,15 @@ class AthleteSerializer(serializers.Serializer):
 
         Overridden on purpose: this serializer always renders an
         ``AthleteOutput`` (the domain entity never reaches this layer),
-        so ``date_of_birth`` is serialized from its ``datetime.date``
-        value with an explicit ``YYYY-MM-DD`` format.
+        so ``registered_at`` is serialized with an explicit
+        ``YYYY-MM-DD`` format.
         """
         return {
             "id": output.id,
-            "first_name": output.first_name,
-            "last_name": output.last_name,
-            "date_of_birth": output.date_of_birth.isoformat(),
+            "athlete_id": output.athlete_id,
+            "label": output.label,
+            "group": output.group,
+            "registered_at": output.registered_at.isoformat()
+            if isinstance(output.registered_at, date)
+            else output.registered_at,
         }

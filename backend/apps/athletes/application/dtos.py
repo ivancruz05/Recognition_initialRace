@@ -19,18 +19,19 @@ __all__ = ["CreateAthleteInput", "AthleteOutput"]
 
 @dataclass(frozen=True)
 class CreateAthleteInput:
-    """Payload required to create an athlete.
+    """Payload required to register an athlete (data contract, Tabla 8).
 
     Attributes:
-        first_name: non-empty once stripped (domain-validated).
-        last_name: non-empty once stripped (domain-validated).
-        date_of_birth: real ``datetime.date``, not future, not before
-            1900-01-01 (domain-validated).
+        athlete_id: pseudonymous technical code (domain-validated).
+        label: academic alias shown to the teacher, optional.
+        group: semester / group, optional.
+        registered_at: registration date; ``None`` means "today".
     """
 
-    first_name: str
-    last_name: str
-    date_of_birth: date
+    athlete_id: str
+    label: str | None = None
+    group: str | None = None
+    registered_at: date | None = None
 
 
 @dataclass(frozen=True)
@@ -42,9 +43,10 @@ class AthleteOutput:
     """
 
     id: int
-    first_name: str
-    last_name: str
-    date_of_birth: date
+    athlete_id: str
+    label: str | None
+    group: str | None
+    registered_at: date
 
     @classmethod
     def from_entity(cls, athlete: Athlete) -> "AthleteOutput":
@@ -68,7 +70,8 @@ class AthleteOutput:
             )
         return cls(
             id=athlete.id,
-            first_name=athlete.first_name,
-            last_name=athlete.last_name,
-            date_of_birth=athlete.date_of_birth,
+            athlete_id=athlete.athlete_id,
+            label=athlete.label,
+            group=athlete.group,
+            registered_at=athlete.registered_at,
         )

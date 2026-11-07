@@ -1,6 +1,6 @@
 """factory_boy factories for the athletes module (DB-backed tests only).
 
-Used by the API tests to seed rows for GET; never imported by the
+Used by the API/infrastructure tests to seed rows; never imported by the
 domain/application suites (those stay pure Python).
 """
 
@@ -19,6 +19,7 @@ class AthleteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Athlete
 
-    first_name = factory.Sequence(lambda n: "First{0}".format(n))
-    last_name = factory.Sequence(lambda n: "Last{0}".format(n))
-    date_of_birth = date(1995, 7, 21)
+    athlete_id = factory.Sequence(lambda n: "ATL-{0:04d}".format(n + 1))
+    label = factory.Sequence(lambda n: "Atleta {0}".format(n))
+    group = factory.Sequence(lambda n: "Grupo {0}".format(n))
+    registered_at = date(2020, 5, 10)

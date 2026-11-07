@@ -34,12 +34,12 @@ class AthleteNotFound(DomainError):
     """Raised when an athlete lookup does not match any persisted record.
 
     Attributes:
-        athlete_id: the identifier that failed the lookup.
+        athlete_id: the technical code that failed the lookup.
     """
 
-    def __init__(self, athlete_id: int) -> None:
+    def __init__(self, athlete_id: str) -> None:
         self.athlete_id = athlete_id
-        super().__init__(f"Athlete with id {athlete_id!r} not found")
+        super().__init__(f"Athlete with athlete_id {athlete_id!r} not found")
 
 
 __all__ = ["AthleteNotFound", "DomainError", "InvalidAthleteData"]

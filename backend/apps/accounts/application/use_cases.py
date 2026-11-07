@@ -31,6 +31,7 @@ class Register:
             email=data.email,
             first_name=data.first_name,
             last_name=data.last_name,
+            user_type=data.user_type,
         )
 
         saved = self._repository.add(user, data.password)

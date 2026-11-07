@@ -5,54 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1754ae5b-5d69-40e3-931a-1f2745874c81" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/drone-analysis.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_001.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_001.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_002.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_003.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_003.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_004.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_005.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_005.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_006.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_006.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_008.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_iphone_008.manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/captura_iphone_008.manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_v2.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/captura_v3.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_001.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_001.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_002.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_002.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_003.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_003.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_004.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_004.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_005.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_005.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_007.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_007.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_008.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_008.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_009.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_009.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_011.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingesta_Intento_011.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/piloto_Intento_010.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/piloto_Intento_010.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_001.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_001.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_003.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_003.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_005.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_005.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_006.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_006.manifest.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_008.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reanalisis_captura_iphone_008.manifest.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/apps/athletes/domain/entities.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/apps/athletes/domain/entities.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detection/infrastructure/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/detection/infrastructure/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/detection/infrastructure/video_file_source.py" beforeDir="false" afterPath="$PROJECT_DIR$/detection/infrastructure/video_file_source.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/detection/test_recognition_infrastructure.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/detection/test_recognition_infrastructure.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,18 +46,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

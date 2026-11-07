@@ -1,8 +1,13 @@
-"""Integration tests for the Django-backed accounts repository."""
+"""Integration tests for the Django-backed accounts repository and JWT."""
+
+from datetime import date, timedelta
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import identify_hasher
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+from rest_framework_simplejwt.settings import api_settings
 
 from apps.accounts.domain import (
     EmailAlreadyRegistered,
@@ -10,7 +15,11 @@ from apps.accounts.domain import (
     UserAccount,
     UserNotFound,
 )
-from apps.accounts.infrastructure import DjangoUserRepository
+from apps.accounts.infrastructure import (
+    DjangoUserRepository,
+    blacklist_refresh_token,
+    issue_tokens,
+)
 
 User = get_user_model()
 
@@ -91,3 +100,72 @@ def test_get_by_id_returns_entity_and_missing_id_raises(account_user):
     assert account.email == account_user.email
     with pytest.raises(UserNotFound):
         repository.get_by_id(999999)
+
+
+@pytest.mark.django_db
+def test_new_account_defaults_to_the_student_role():
+    repository = DjangoUserRepository()
+    account = UserAccount(
+        email="nuevo@example.com", first_name="Nuevo", last_name="Estudiante"
+    )
+
+    saved = repository.add(account, "correct-horse-battery")
+
+    assert saved.user_type == "student"
+    assert User.objects.get(pk=saved.id).user_type == "student"
+
+
+@pytest.mark.django_db
+def test_verify_credentials_exposes_the_linked_athlete_code():
+    from apps.athletes.infrastructure.models import Athlete
+
+    athlete = Athlete.objects.create(
+        athlete_id="ATL-0001", registered_at=date(2026, 1, 15)
+    )
+    user = User.objects.create_user(
+        email="ada@example.com",
+        password="correct-horse-battery",
+        first_name="Ada",
+        last_name="Lovelace",
+        user_type="student",
+        athlete=athlete,
+    )
+
+    account = DjangoUserRepository().verify_credentials(
+        user.email, "correct-horse-battery"
+    )
+
+    assert account.user_type == "student"
+    assert account.athlete_id == "ATL-0001"
+
+
+# -- JWT (SimpleJWT) -------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_issue_tokens_returns_access_and_refresh_for_the_user(account_user):
+    tokens = issue_tokens(account_user)
+
+    assert set(tokens) == {"access", "refresh"}
+    # El access verifica como token de acceso; el refresh, como refresh.
+    from rest_framework_simplejwt.tokens import AccessToken
+
+    AccessToken(tokens["access"])
+    RefreshToken(tokens["refresh"])
+
+
+@pytest.mark.django_db
+def test_blacklisted_refresh_token_cannot_be_used_again(account_user):
+    tokens = issue_tokens(account_user)
+
+    blacklist_refresh_token(tokens["refresh"])
+
+    with pytest.raises(TokenError):
+        RefreshToken(tokens["refresh"])
+
+
+def test_simplejwt_uses_project_token_lifetimes_and_rotation_settings():
+    assert api_settings.ACCESS_TOKEN_LIFETIME == timedelta(minutes=60)
+    assert api_settings.REFRESH_TOKEN_LIFETIME == timedelta(days=7)
+    assert api_settings.ROTATE_REFRESH_TOKENS is True
+    assert api_settings.BLACKLIST_AFTER_ROTATION is True

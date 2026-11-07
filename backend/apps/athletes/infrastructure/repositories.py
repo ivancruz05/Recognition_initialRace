@@ -55,8 +55,8 @@ class DjangoAthleteRepository(AthleteRepository):
 
         Raises:
             InvalidAthleteData: if the datastore rejects the payload
-                (schema level: max length, not-null, future schema
-                constraints...), translated from Django's
+                (schema level: max length, not-null, duplicated
+                ``athlete_id``...), translated from Django's
                 ``ValidationError``. Domain invariants are not
                 re-checked here.
         """
@@ -69,35 +69,42 @@ class DjangoAthleteRepository(AthleteRepository):
         athlete.id = instance.pk
         return athlete
 
-    def get_by_id(self, athlete_id: int) -> Athlete:
-        """Return the athlete stored under ``athlete_id``.
+    def get_by_athlete_id(self, athlete_id: str) -> Athlete:
+        """Return the athlete stored under the technical ``athlete_id``.
 
         Raises:
             AthleteNotFound: when no row matches. Never returns
                 ``None``.
         """
         try:
-            instance = AthleteModel.objects.get(pk=athlete_id)
+            instance = AthleteModel.objects.get(athlete_id=athlete_id)
         except AthleteModel.DoesNotExist:
             raise AthleteNotFound(athlete_id)
         return self._to_entity(instance)
+
+    def list_all(self) -> list[Athlete]:
+        """Every athlete ordered by technical code."""
+        instances = AthleteModel.objects.order_by("athlete_id")
+        return [self._to_entity(instance) for instance in instances]
 
     # -- entity <-> model mapping ------------------------------------------
     @staticmethod
     def _to_model(athlete: Athlete) -> AthleteModel:
         """Domain entity -> unpersisted ORM instance (``id`` excluded)."""
         return AthleteModel(
-            first_name=athlete.first_name,
-            last_name=athlete.last_name,
-            date_of_birth=athlete.date_of_birth,
+            athlete_id=athlete.athlete_id,
+            label=athlete.label,
+            group=athlete.group,
+            registered_at=athlete.registered_at,
         )
 
     @staticmethod
     def _to_entity(instance: AthleteModel) -> Athlete:
-        """ORM instance -> domain entity (``date_of_birth`` is a date)."""
+        """ORM instance -> domain entity (``registered_at`` is a date)."""
         return Athlete(
-            first_name=instance.first_name,
-            last_name=instance.last_name,
-            date_of_birth=instance.date_of_birth,
+            athlete_id=instance.athlete_id,
+            label=instance.label,
+            group=instance.group,
+            registered_at=instance.registered_at,
             id=instance.pk,
         )

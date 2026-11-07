@@ -3,92 +3,126 @@
 Pure Python (stdlib only). This module must never import Django, DRF or
 any other project layer: dates are ``datetime.date``, not
 ``django.utils.timezone`` objects.
+
+Aligned with the monograph data contract (Tabla 8): the athlete is
+identified by a pseudonymous technical code (``athlete_id``), never by a
+personal document, and the personal fields of the source system are not
+imported (data minimization, Ley 1581 de 2012).
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional
 
 from .exceptions import InvalidAthleteData
+
+MAX_CODE_LENGTH = 64
+MAX_LABEL_LENGTH = 120
 
 
 @dataclass
 class Athlete:
-    """An athlete of the racing team.
+    """An athlete of the CADI, referenced by a pseudonymous code.
 
     Mutable on purpose: the repository assigns ``id`` after persisting
     (see ``AthleteRepository.add``). Every other attribute is validated
-    at construction time; mutating them afterwards without re-validating
-    is out of scope for the domain layer.
+    at construction time.
 
     Invariants (enforced in ``__post_init__``):
-        * ``first_name`` / ``last_name``: ``str``, non-empty once
-          stripped of surrounding whitespace.
-        * ``date_of_birth``: a real ``datetime.date`` (not a string),
-          not in the future and not before 1900-01-01.
+        * ``athlete_id``: non-empty ``str`` up to ``MAX_CODE_LENGTH``
+          (technical code, e.g. ``"ATL-1042"``);
+        * ``label`` / ``group``: ``None`` or a non-empty ``str``;
+        * ``registered_at``: a real ``datetime.date``, not in the future
+          and not before 1900-01-01;
         * ``id``: ``None`` before persistence, positive ``int`` after.
 
     Raises:
         InvalidAthleteData: if any invariant above is broken.
     """
 
-    first_name: str
-    last_name: str
-    date_of_birth: date
-    id: Optional[int] = None
+    athlete_id: str
+    label: str | None = None
+    group: str | None = None
+    registered_at: date = field(default_factory=date.today)
+    id: int | None = None
 
     def __post_init__(self) -> None:
-        self._validate_name("first_name", self.first_name)
-        self._validate_name("last_name", self.last_name)
-        self._validate_date_of_birth(self.date_of_birth)
+        self._validate_code("athlete_id", self.athlete_id, MAX_CODE_LENGTH)
+        self._validate_optional_text("label", self.label, MAX_LABEL_LENGTH)
+        self._validate_optional_text("group", self.group, MAX_LABEL_LENGTH)
+        self._validate_registered_at(self.registered_at)
         self._validate_id(self.id)
 
     # -- validation helpers -------------------------------------------------
     @staticmethod
-    def _validate_name(field_name: str, value: str) -> None:
+    def _validate_code(field_name: str, value: str, max_length: int) -> None:
         if not isinstance(value, str):
             raise InvalidAthleteData(
-                "{0} must be a str, got {1}".format(field_name, type(value).__name__),
+                f"{field_name} must be a str, got {type(value).__name__}",
                 field=field_name,
             )
         if not value.strip():
             raise InvalidAthleteData(
-                "{0} must not be empty".format(field_name),
+                f"{field_name} must not be empty",
+                field=field_name,
+            )
+        if len(value) > max_length:
+            raise InvalidAthleteData(
+                f"{field_name} must be at most {max_length} chars",
+                field=field_name,
+            )
+
+    @classmethod
+    def _validate_optional_text(
+        cls, field_name: str, value: str | None, max_length: int
+    ) -> None:
+        if value is None:
+            return
+        if not isinstance(value, str):
+            raise InvalidAthleteData(
+                f"{field_name} must be a str or None, got {type(value).__name__}",
+                field=field_name,
+            )
+        if not value.strip():
+            raise InvalidAthleteData(
+                f"{field_name} must not be blank when provided",
+                field=field_name,
+            )
+        if len(value) > max_length:
+            raise InvalidAthleteData(
+                f"{field_name} must be at most {max_length} chars",
                 field=field_name,
             )
 
     @staticmethod
-    def _validate_date_of_birth(value: date) -> None:
+    def _validate_registered_at(value: date) -> None:
         # bool is a subclass of int, but a bool is never a valid date.
         if isinstance(value, bool) or not isinstance(value, date):
             raise InvalidAthleteData(
-                "date_of_birth must be a datetime.date, got {0}".format(
-                    type(value).__name__
-                ),
-                field="date_of_birth",
+                f"registered_at must be a datetime.date, got {type(value).__name__}",
+                field="registered_at",
             )
         if value > date.today():
             raise InvalidAthleteData(
-                "date_of_birth {0} is in the future".format(value.isoformat()),
-                field="date_of_birth",
+                f"registered_at {value.isoformat()} is in the future",
+                field="registered_at",
             )
         if value < date(1900, 1, 1):
             raise InvalidAthleteData(
-                "date_of_birth {0} is before 1900-01-01".format(value.isoformat()),
-                field="date_of_birth",
+                f"registered_at {value.isoformat()} is before 1900-01-01",
+                field="registered_at",
             )
 
     @staticmethod
-    def _validate_id(value: Optional[int]) -> None:
+    def _validate_id(value: int | None) -> None:
         if value is None:
             return
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise InvalidAthleteData(
-                "id must be a positive int or None, got {0!r}".format(value),
+                f"id must be a positive int or None, got {value!r}",
                 field="id",
             )
 
 
-__all__ = ["Athlete"]
+__all__ = ["Athlete", "MAX_CODE_LENGTH", "MAX_LABEL_LENGTH"]

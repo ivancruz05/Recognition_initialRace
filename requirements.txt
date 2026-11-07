@@ -1,14 +1,8 @@
-# Recognition MVP runtime dependencies (tested with Python 3.9.6)
-click==8.1.8
-mediapipe==0.10.21
-numpy==1.26.4
-opencv-contrib-python==4.11.0.86
-
-# Test dependency
-pytest==8.4.2
-# Runtime
+# CADI Fase II — runtime dependencies (tested with Python 3.9)
 Django==4.2.30
 djangorestframework==3.16.1
+djangorestframework-simplejwt==5.4.0
+django-cors-headers==4.9.0
 argon2-cffi==25.1.0
 
 # Tests
@@ -16,11 +10,3 @@ pytest==8.4.2
 pytest-django==4.11.1
 factory-boy==3.3.3
 Faker==37.12.0
-
-# Visión / reconocimiento (instalados en .venv, aún sin importar en el código)
-# numpy==1.26.4
-# opencv-contrib-python==4.11.0.86
-# mediapipe==0.10.21
-# matplotlib==3.9.4
-# scipy==1.13.1
-# sounddevice==0.5.6

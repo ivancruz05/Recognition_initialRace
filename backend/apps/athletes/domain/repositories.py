@@ -18,10 +18,9 @@ from .entities import Athlete
 class AthleteRepository(ABC):
     """Persistence port for :class:`Athlete`.
 
-    Only the operations required by the current use cases
-    (create athlete, get athlete) are declared. Update, delete and
-    listing are deliberately absent: no use case needs them yet, and
-    adding a method here later cannot break existing implementations.
+    Only the operations required by the current use cases are declared
+    (create, lookup by technical code, list for the filter catalogue).
+    Adding a method later cannot break existing implementations.
     """
 
     @abstractmethod
@@ -29,34 +28,25 @@ class AthleteRepository(ABC):
         """Persist a new athlete.
 
         The implementation must assign a positive ``id`` to the stored
-        record and return the resulting ``Athlete`` (typically via
-        ``dataclasses.replace(athlete, id=saved_id)`` or by setting
-        ``athlete.id`` before returning it).
-
-        Args:
-            athlete: a valid, not-yet-persisted athlete (``id is None``).
-
-        Returns:
-            The same athlete with ``id`` assigned by the datastore.
+        record and return the resulting ``Athlete``.
 
         Raises:
-            InvalidAthleteData: if the datastore rejects the payload.
+            InvalidAthleteData: if the datastore rejects the payload
+                (including a duplicated ``athlete_id``).
         """
 
     @abstractmethod
-    def get_by_id(self, athlete_id: int) -> Athlete:
-        """Return the athlete with the given ``athlete_id``.
-
-        Args:
-            athlete_id: identifier previously assigned by :meth:`add`.
-
-        Returns:
-            The persisted athlete.
+    def get_by_athlete_id(self, athlete_id: str) -> Athlete:
+        """Return the athlete with the given technical ``athlete_id``.
 
         Raises:
-            AthleteNotFound: if no athlete exists with that id. The
-                repository must raise it, never return ``None``.
+            AthleteNotFound: if no athlete matches. The repository must
+                raise it, never return ``None``.
         """
+
+    @abstractmethod
+    def list_all(self) -> list[Athlete]:
+        """Return every athlete ordered by technical code (filter catalogue)."""
 
 
 __all__ = ["AthleteRepository"]

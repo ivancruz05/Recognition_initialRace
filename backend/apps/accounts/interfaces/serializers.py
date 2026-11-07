@@ -6,7 +6,7 @@ from ..application import AuthOutput, LoginInput, RegisterInput
 
 
 class LoginSerializer(serializers.Serializer):
-    # Entrada de Json de longin. Salida: AuthOutput ya mapeado.
+    # Entrada JSON de login. Salida: AuthOutput ya mapeado.
 
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, trim_whitespace=False)
@@ -15,15 +15,6 @@ class LoginSerializer(serializers.Serializer):
         return LoginInput(
             email=validated_data["email"], password=validated_data["password"]
         )
-
-    def to_representation(self, output: AuthOutput) -> dict:
-        return {
-            "id": output.id,
-            "email": output.email,
-            "first_name": output.first_name,
-            "last_name": output.last_name,
-            "user_type": output.user_type,
-        }
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -38,18 +29,12 @@ class RegisterSerializer(serializers.Serializer):
     last_name = serializers.CharField(required=False, allow_blank=True, max_length=150)
 
     def to_application_input(self, validated_data: dict) -> RegisterInput:
+        # El registro público siempre crea un Estudiante: el alta de Docentes
+        # y Administradores se hace desde el admin de Django (RNF-04).
         return RegisterInput(
             email=validated_data["email"],
             password=validated_data["password"],
             first_name=validated_data.get("first_name", ""),
             last_name=validated_data.get("last_name", ""),
+            user_type="student",
         )
-
-    def to_representation(self, output: AuthOutput) -> dict:
-        return {
-            "id": output.id,
-            "email": output.email,
-            "first_name": output.first_name,
-            "last_name": output.last_name,
-            "user_type": output.user_type,
-        }

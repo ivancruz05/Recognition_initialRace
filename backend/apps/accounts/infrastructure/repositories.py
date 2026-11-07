@@ -28,6 +28,7 @@ class DjangoUserRepository(UserRepository):
                 password=password,
                 first_name=user.first_name,
                 last_name=user.last_name,
+                user_type=user.user_type,
             )
         except ValidationError as exc:
             raise InvalidAccountData("; ".join(exc.messages)) from exc
@@ -60,5 +61,8 @@ class DjangoUserRepository(UserRepository):
             first_name=instance.first_name,
             last_name=instance.last_name,
             user_type=instance.user_type,
+            athlete_id=(
+                instance.athlete.athlete_id if instance.athlete_id else None
+            ),
             id=instance.pk,
         )
