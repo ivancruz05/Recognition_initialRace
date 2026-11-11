@@ -4,6 +4,7 @@ djangorestframework==3.16.1
 djangorestframework-simplejwt==5.4.0
 django-cors-headers==4.9.0
 argon2-cffi==25.1.0
+gunicorn==23.0.0
 
 # Tests
 pytest==8.4.2
