@@ -124,9 +124,9 @@ def _database_from_url(database_url: str) -> dict:
     }
 
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-if DATABASE_URL:
-    DATABASES = {"default": _database_from_url(DATABASE_URL)}
+_database_url = os.environ.get("DATABASE_URL")
+if _database_url:
+    DATABASES = {"default": _database_from_url(_database_url)}
 else:
     DATABASES = {
         "default": {
@@ -226,4 +226,3 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
     if origin.strip()
 ]
-
