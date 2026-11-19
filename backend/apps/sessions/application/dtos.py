@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Optional
 
-from ..domain import BiomechanicalMetrics, SprintSession
+from ..domain import BiomechanicalMetrics, SprintSession, TrainingSession
 
 __all__ = [
     "RequesterContext",
@@ -27,6 +27,9 @@ __all__ = [
     "ComparisonMatrixDTO",
     "IngestionErrorDTO",
     "IngestionResultDTO",
+    "TrainingSessionFilterInput",
+    "TrainingSessionWriteInput",
+    "TrainingSessionDTO",
 ]
 
 # Orden estable de las cuatro variables del dominio en todas las salidas.
@@ -66,6 +69,57 @@ class SessionFilterInput:
 
 
 @dataclass(frozen=True)
+class TrainingSessionFilterInput:
+    requester: RequesterContext
+    athlete_id: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class TrainingSessionWriteInput:
+    requester: RequesterContext
+    athlete_id: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    duration_minutes: Optional[int] = None
+    training_type: Optional[str] = None
+    attendance_status: Optional[str] = None
+    coach: Optional[str] = None
+    location: Optional[str] = None
+    follow_up_notes: Optional[str] = None
+    sprint_session_ids: Optional[tuple[str, ...]] = None
+
+
+@dataclass(frozen=True)
+class TrainingSessionDTO:
+    id: int
+    athlete_id: str
+    timestamp: datetime
+    duration_minutes: int
+    training_type: str
+    attendance_status: str
+    coach: str
+    location: str
+    follow_up_notes: str
+    sprint_session_ids: tuple[str, ...]
+
+    @classmethod
+    def from_entity(cls, session: TrainingSession) -> "TrainingSessionDTO":
+        if session.id is None:
+            raise ValueError("TrainingSession must be persisted before output mapping")
+        return cls(
+            id=session.id,
+            athlete_id=session.athlete_id,
+            timestamp=session.timestamp,
+            duration_minutes=session.duration_minutes,
+            training_type=session.training_type,
+            attendance_status=session.attendance_status,
+            coach=session.coach,
+            location=session.location,
+            follow_up_notes=session.follow_up_notes,
+            sprint_session_ids=session.sprint_session_ids,
+        )
+
+
+@dataclass(frozen=True)
 class SeriesPointDTO:
     t: float
     value: float
@@ -98,6 +152,7 @@ class SessionListItemDTO:
     available_variables: tuple[str, ...]
     source_system: str
     schema_version: Optional[str] = None
+    training_session_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -110,6 +165,7 @@ class SessionDetailDTO:
     schema_version: Optional[str]
     observation: Optional[str]
     variables: tuple[VariableDTO, ...]
+    training_session_id: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -203,6 +259,7 @@ def _list_item(session: SprintSession) -> SessionListItemDTO:
         available_variables=session.available_variables,
         source_system=source,
         schema_version=schema,
+        training_session_id=session.training_session_id,
     )
 
 

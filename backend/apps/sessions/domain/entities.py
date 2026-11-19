@@ -29,6 +29,8 @@ __all__ = [
     "PostureMetric",
     "BiomechanicalMetrics",
     "SprintSession",
+    "TrainingSession",
+    "TRAINING_ATTENDANCE_STATUSES",
     "UNIT_POSTURE",
     "UNIT_SPEED",
     "UNIT_STRIDE",
@@ -41,6 +43,7 @@ UNIT_POSTURE = "deg"
 UNIT_SPEED = "m/s"
 UNIT_STRIDE = "m"
 UNIT_CADENCE = "pasos/s"
+TRAINING_ATTENDANCE_STATUSES = ("present", "absent", "excused")
 
 
 class AvailabilityStatus(Enum):
@@ -279,6 +282,7 @@ class SprintSession:
     metrics: BiomechanicalMetrics
     metadata: dict = field(default_factory=dict)
     id: int | None = None
+    training_session_id: int | None = None
 
     def __post_init__(self) -> None:
         self._validate_code("session_id", self.session_id)
@@ -291,6 +295,15 @@ class SprintSession:
             )
         if not isinstance(self.metadata, dict):
             raise InvalidSessionData("metadata must be a dict", field="metadata")
+        if self.training_session_id is not None and (
+            isinstance(self.training_session_id, bool)
+            or not isinstance(self.training_session_id, int)
+            or self.training_session_id <= 0
+        ):
+            raise InvalidSessionData(
+                "training_session_id must be a positive int or None",
+                field="training_session_id",
+            )
         source = self.metadata.get("source_system")
         if not isinstance(source, str) or not source.strip():
             raise InvalidSessionData(
@@ -327,3 +340,79 @@ class SprintSession:
             ("cadence", self.metrics.cadence),
         )
         return tuple(name for name, metric in pairs if metric.is_available)
+
+
+@dataclass
+class TrainingSession:
+    """Individual training record for one athlete.
+
+    Sprint measurements remain separate ``SprintSession`` records and are
+    linked by their business IDs. The repository assigns ``id`` on save.
+    """
+
+    athlete_id: str
+    timestamp: datetime
+    duration_minutes: int
+    training_type: str
+    attendance_status: str
+    coach: str = ""
+    location: str = ""
+    follow_up_notes: str = ""
+    sprint_session_ids: tuple[str, ...] = ()
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        SprintSession._validate_code("athlete_id", self.athlete_id)
+        SprintSession._validate_timestamp(self.timestamp)
+        if (
+            isinstance(self.duration_minutes, bool)
+            or not isinstance(self.duration_minutes, int)
+            or self.duration_minutes < 1
+            or self.duration_minutes > 1440
+        ):
+            raise InvalidSessionData(
+                "duration_minutes must be an integer between 1 and 1440",
+                field="duration_minutes",
+            )
+        self._validate_text("training_type", self.training_type, 120, required=True)
+        if self.attendance_status not in TRAINING_ATTENDANCE_STATUSES:
+            raise InvalidSessionData(
+                "attendance_status must be present, absent or excused",
+                field="attendance_status",
+            )
+        self._validate_text("coach", self.coach, 150)
+        self._validate_text("location", self.location, 150)
+        self._validate_text("follow_up_notes", self.follow_up_notes, 4000)
+        if not isinstance(self.sprint_session_ids, tuple):
+            raise InvalidSessionData(
+                "sprint_session_ids must be a tuple", field="sprint_session_ids"
+            )
+        for session_id in self.sprint_session_ids:
+            SprintSession._validate_code("sprint_session_ids", session_id)
+        if len(set(self.sprint_session_ids)) != len(self.sprint_session_ids):
+            raise InvalidSessionData(
+                "sprint_session_ids must not contain duplicates",
+                field="sprint_session_ids",
+            )
+        if self.id is not None and (
+            isinstance(self.id, bool) or not isinstance(self.id, int) or self.id <= 0
+        ):
+            raise InvalidSessionData("id must be a positive int or None", field="id")
+
+    @staticmethod
+    def _validate_text(
+        field_name: str, value: str, max_length: int, required: bool = False
+    ) -> None:
+        if not isinstance(value, str):
+            raise InvalidSessionData(
+                f"{field_name} must be a str", field=field_name
+            )
+        if required and not value.strip():
+            raise InvalidSessionData(
+                f"{field_name} must not be empty", field=field_name
+            )
+        if len(value) > max_length:
+            raise InvalidSessionData(
+                f"{field_name} must be at most {max_length} chars",
+                field=field_name,
+            )

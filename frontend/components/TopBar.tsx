@@ -19,6 +19,7 @@ export function TopBar() {
   const links: { href: string; label: string }[] = [
     { href: "/dashboard", label: "Resumen" },
     { href: "/sessions", label: "Sesiones" },
+    { href: "/training-sessions", label: "Entrenamientos" },
   ];
   if (isStaff(profile)) {
     links.push({ href: "/ingest", label: "Ingesta" });

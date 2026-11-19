@@ -15,6 +15,40 @@ never stores an implicit zero (RF-09).
 from django.db import models
 
 
+class TrainingSessionModel(models.Model):
+    """An individual training session belonging to one athlete."""
+
+    ATTENDANCE_CHOICES = (
+        ("present", "Presente"),
+        ("absent", "Ausente"),
+        ("excused", "Justificada"),
+    )
+
+    athlete = models.ForeignKey(
+        "athletes.Athlete",
+        on_delete=models.CASCADE,
+        related_name="training_sessions",
+    )
+    timestamp = models.DateTimeField()
+    duration_minutes = models.PositiveSmallIntegerField()
+    training_type = models.CharField(max_length=120)
+    attendance_status = models.CharField(max_length=10, choices=ATTENDANCE_CHOICES)
+    coach = models.CharField(max_length=150, blank=True, default="")
+    location = models.CharField(max_length=150, blank=True, default="")
+    follow_up_notes = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "training session"
+        verbose_name_plural = "training sessions"
+        db_table = "cadi_trainingsession"
+        ordering = ["-timestamp", "-id"]
+
+    def __str__(self) -> str:
+        return f"{self.training_type} · {self.athlete.athlete_id}"
+
+
 class SprintSessionModel(models.Model):
     """``cadi_sprintsession``: one 10 m sprint test of the CADI."""
 
@@ -23,6 +57,13 @@ class SprintSessionModel(models.Model):
         "athletes.Athlete",
         on_delete=models.CASCADE,
         related_name="sprint_sessions",
+    )
+    training_session = models.ForeignKey(
+        "sprint_sessions.TrainingSessionModel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="sprint_tests",
     )
     timestamp = models.DateTimeField()
     test_type = models.CharField(max_length=120)

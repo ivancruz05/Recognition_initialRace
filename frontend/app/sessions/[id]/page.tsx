@@ -130,10 +130,17 @@ export default function SessionDetailPage() {
               <p className="eyebrow">SESIÓN DE VELOCIDAD · HISTÓRICO CADI</p>
               <h1 className="page-title">{session.session_id}</h1>
               <div className="detail-title-meta">
-                <span>Atleta <strong>{session.athlete_id}</strong></span>
-                <span>{formatDate(session.timestamp)}</span>
-                <Badge className="badge">{session.test_type}</Badge>
-                <Badge variant="secondary" className="badge grey">
+                  <span>Atleta <strong>{session.athlete_id}</strong></span>
+                  <span>{formatDate(session.timestamp)}</span>
+                  <Badge className="badge">{session.test_type}</Badge>
+                  {session.training_session_id !== null && (
+                    <Link
+                      href={`/training-sessions#training-session-${session.training_session_id}`}
+                    >
+                      Ver entrenamiento asociado
+                    </Link>
+                  )}
+                  <Badge variant="secondary" className="badge grey">
                   {session.variables.filter((variable) => variable.available).length}/4 variables disponibles
                 </Badge>
               </div>

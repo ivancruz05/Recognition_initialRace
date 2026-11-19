@@ -6,7 +6,10 @@ from copy import deepcopy
 
 import pytest
 
-from apps.sessions.infrastructure.models import SprintSessionModel
+from apps.sessions.infrastructure.models import (
+    SprintSessionModel,
+    TrainingSessionModel,
+)
 
 from .factories import make_contract
 
@@ -89,3 +92,123 @@ def test_detail_serializa_variable_ausente_com_null_y_no_cero(api_client, authen
     speed = next(item for item in response.json()["variables"] if item["name"] == "speed")
     assert speed["available"] is False
     assert speed["value"] is None
+
+
+def _training_payload(**overrides):
+    payload = {
+        "athlete_id": "ATL-0001",
+        "timestamp": "2026-10-04T09:00:00Z",
+        "duration_minutes": 60,
+        "training_type": "Fuerza y velocidad",
+        "attendance_status": "present",
+        "coach": "Entrenador CADI",
+        "location": "Pista principal",
+        "follow_up_notes": "Revisar técnica de salida.",
+        "sprint_session_ids": [],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_teacher_creates_and_updates_training_session_linked_to_sprint_test(
+    api_client, authenticate, seed_sessions
+):
+    seed_sessions(make_contract(session_id="SES-TRAIN-001"))
+    authenticate("teacher")
+
+    created = api_client.post(
+        "/api/v1/training-sessions/",
+        _training_payload(sprint_session_ids=["SES-TRAIN-001"]),
+        format="json",
+    )
+    assert created.status_code == 201, created.json()
+    result = created.json()
+    assert result["athlete_id"] == "ATL-0001"
+    assert result["attendance_status"] == "present"
+    assert result["sprint_session_ids"] == ["SES-TRAIN-001"]
+    assert (
+        SprintSessionModel.objects.get(session_id="SES-TRAIN-001").training_session_id
+        == result["id"]
+    )
+    sprint_detail = api_client.get("/api/v1/sessions/SES-TRAIN-001/")
+    assert sprint_detail.status_code == 200
+    assert sprint_detail.json()["training_session_id"] == result["id"]
+
+    updated = api_client.patch(
+        f"/api/v1/training-sessions/{result['id']}/",
+        {"attendance_status": "excused", "follow_up_notes": "Reprogramar."},
+        format="json",
+    )
+    assert updated.status_code == 200, updated.json()
+    assert updated.json()["attendance_status"] == "excused"
+    assert updated.json()["follow_up_notes"] == "Reprogramar."
+    assert updated.json()["sprint_session_ids"] == ["SES-TRAIN-001"]
+
+
+def test_training_session_rejects_sprint_test_from_another_athlete(
+    api_client, authenticate, seed_sessions
+):
+    seed_sessions(
+        make_contract(session_id="SES-OWN", athlete_id="ATL-0001"),
+        make_contract(session_id="SES-OTHER", athlete_id="ATL-0002"),
+    )
+    authenticate("teacher")
+    response = api_client.post(
+        "/api/v1/training-sessions/",
+        _training_payload(sprint_session_ids=["SES-OTHER"]),
+        format="json",
+    )
+    assert response.status_code == 400
+    assert response.json()["field"] == "sprint_session_ids"
+    assert TrainingSessionModel.objects.count() == 0
+
+
+def test_student_lists_only_own_training_sessions_and_cannot_create_or_edit(
+    api_client, authenticate, seed_sessions
+):
+    from apps.athletes.infrastructure.models import Athlete
+
+    seed_sessions(
+        make_contract(session_id="SES-OWN", athlete_id="ATL-0001"),
+        make_contract(session_id="SES-OTHER", athlete_id="ATL-0002"),
+    )
+    authenticate("teacher")
+    own = api_client.post(
+        "/api/v1/training-sessions/", _training_payload(), format="json"
+    ).json()
+    other = api_client.post(
+        "/api/v1/training-sessions/",
+        _training_payload(athlete_id="ATL-0002"),
+        format="json",
+    ).json()
+
+    athlete = Athlete.objects.get(athlete_id="ATL-0001")
+    authenticate("student", athlete=athlete, email="student-training@example.com")
+    listed = api_client.get(
+        "/api/v1/training-sessions/?athlete_id=ATL-0002"
+    ).json()
+    assert [item["id"] for item in listed] == [own["id"]]
+    assert (
+        api_client.get(f"/api/v1/training-sessions/{own['id']}/").status_code
+        == 200
+    )
+    assert (
+        api_client.get(f"/api/v1/training-sessions/{other['id']}/").status_code
+        == 403
+    )
+    assert (
+        api_client.post(
+            "/api/v1/training-sessions/",
+            _training_payload(),
+            format="json",
+        ).status_code
+        == 403
+    )
+    assert (
+        api_client.patch(
+            f"/api/v1/training-sessions/{own['id']}/",
+            {"attendance_status": "absent"},
+            format="json",
+        ).status_code
+        == 403
+    )

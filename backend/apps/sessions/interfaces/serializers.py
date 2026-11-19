@@ -26,7 +26,10 @@ from ..application import (
     SessionDetailDTO,
     SessionFilterInput,
     SessionListItemDTO,
+    TrainingSessionDTO,
+    TrainingSessionWriteInput,
 )
+from ..domain import TRAINING_ATTENDANCE_STATUSES
 
 __all__ = [
     "parse_requester",
@@ -36,6 +39,8 @@ __all__ = [
     "DashboardSummarySerializer",
     "ComparisonSerializer",
     "IngestionResultSerializer",
+    "TrainingSessionPayloadSerializer",
+    "TrainingSessionSerializer",
 ]
 
 
@@ -89,6 +94,7 @@ class SessionListItemSerializer:
             "available_variables": list(dto.available_variables),
             "source_system": dto.source_system,
             "schema_version": dto.schema_version,
+            "training_session_id": dto.training_session_id,
         }
 
 
@@ -110,6 +116,7 @@ class SessionDetailSerializer:
             "variables": [
                 SessionDetailSerializer._variable(variable) for variable in dto.variables
             ],
+            "training_session_id": dto.training_session_id,
         }
 
     @staticmethod
@@ -199,4 +206,54 @@ class IngestionResultSerializer:
                 }
                 for error in dto.errors
             ],
+        }
+
+
+class TrainingSessionPayloadSerializer(serializers.Serializer):
+    """Validate create/partial-update payloads for individual trainings."""
+
+    athlete_id = serializers.CharField(max_length=64)
+    timestamp = serializers.DateTimeField()
+    duration_minutes = serializers.IntegerField(min_value=1, max_value=1440)
+    training_type = serializers.CharField(max_length=120)
+    attendance_status = serializers.ChoiceField(
+        choices=TRAINING_ATTENDANCE_STATUSES
+    )
+    coach = serializers.CharField(
+        required=False, allow_blank=True, max_length=150, default=""
+    )
+    location = serializers.CharField(
+        required=False, allow_blank=True, max_length=150, default=""
+    )
+    follow_up_notes = serializers.CharField(
+        required=False, allow_blank=True, max_length=4000, default=""
+    )
+    sprint_session_ids = serializers.ListField(
+        child=serializers.CharField(max_length=64),
+        required=False,
+    )
+
+    def to_input(self, requester: RequesterContext) -> TrainingSessionWriteInput:
+        values = dict(self.validated_data)
+        if "sprint_session_ids" in values:
+            values["sprint_session_ids"] = tuple(values["sprint_session_ids"])
+        return TrainingSessionWriteInput(requester=requester, **values)
+
+
+class TrainingSessionSerializer:
+    """Map the application DTO to the public JSON contract."""
+
+    @staticmethod
+    def to_representation(dto: TrainingSessionDTO) -> dict:
+        return {
+            "id": dto.id,
+            "athlete_id": dto.athlete_id,
+            "timestamp": _iso(dto.timestamp),
+            "duration_minutes": dto.duration_minutes,
+            "training_type": dto.training_type,
+            "attendance_status": dto.attendance_status,
+            "coach": dto.coach,
+            "location": dto.location,
+            "follow_up_notes": dto.follow_up_notes,
+            "sprint_session_ids": list(dto.sprint_session_ids),
         }
