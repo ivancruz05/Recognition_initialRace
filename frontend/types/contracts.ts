@@ -59,6 +59,7 @@ export interface SessionDetail {
   test_type: string;
   source: SessionSource;
   variables: Variable[];
+  training_session_id: number | null;
 }
 
 export interface SessionListItem {
@@ -69,6 +70,7 @@ export interface SessionListItem {
   available_variables: string[];
   source_system: string;
   schema_version: string | null;
+  training_session_id: number | null;
 }
 
 export interface SessionFilters {
@@ -78,6 +80,23 @@ export interface SessionFilters {
   date_from?: string;
   date_to?: string;
 }
+
+export type AttendanceStatus = "present" | "absent" | "excused";
+
+export interface TrainingSession {
+  id: number;
+  athlete_id: string;
+  timestamp: string;
+  duration_minutes: number;
+  training_type: string;
+  attendance_status: AttendanceStatus;
+  coach: string;
+  location: string;
+  follow_up_notes: string;
+  sprint_session_ids: string[];
+}
+
+export type TrainingSessionPayload = Omit<TrainingSession, "id">;
 
 export interface ComparisonPoint {
   session_id: string;

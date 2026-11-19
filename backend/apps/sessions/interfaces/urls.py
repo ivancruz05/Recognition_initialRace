@@ -14,6 +14,8 @@ from .views import (
     SessionDetailAPIView,
     SessionIngestAPIView,
     SessionListAPIView,
+    TrainingSessionDetailAPIView,
+    TrainingSessionListAPIView,
 )
 
 __all__ = ["urlpatterns"]
@@ -23,6 +25,16 @@ urlpatterns = [
     path("sessions/", SessionListAPIView.as_view(), name="session-list"),
     path("sessions/compare/", SessionCompareAPIView.as_view(), name="session-compare"),
     path("sessions/ingest/", SessionIngestAPIView.as_view(), name="session-ingest"),
+    path(
+        "training-sessions/",
+        TrainingSessionListAPIView.as_view(),
+        name="training-session-list",
+    ),
+    path(
+        "training-sessions/<int:training_session_id>/",
+        TrainingSessionDetailAPIView.as_view(),
+        name="training-session-detail",
+    ),
     path(
         "sessions/<str:session_id>/",
         SessionDetailAPIView.as_view(),

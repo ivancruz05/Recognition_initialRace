@@ -262,8 +262,9 @@ export default function SessionsPage() {
                 <TableHead>Sesión</TableHead>
                 <TableHead>Atleta</TableHead>
                 <TableHead>Fecha</TableHead>
-                <TableHead>Prueba</TableHead>
-                <TableHead>Origen</TableHead>
+                  <TableHead>Prueba</TableHead>
+                  <TableHead>Entrenamiento</TableHead>
+                  <TableHead>Origen</TableHead>
                 <TableHead>Variables</TableHead>
               </TableRow>
             </TableHeader>
@@ -291,8 +292,19 @@ export default function SessionsPage() {
                     </TableCell>
                     <TableCell>{session.athlete_id}</TableCell>
                     <TableCell>{formatDate(session.timestamp)}</TableCell>
-                    <TableCell>{session.test_type}</TableCell>
-                    <TableCell className="small muted">
+                      <TableCell>{session.test_type}</TableCell>
+                      <TableCell>
+                        {session.training_session_id !== null ? (
+                          <Link
+                            href={`/training-sessions#training-session-${session.training_session_id}`}
+                          >
+                            Ver entrenamiento
+                          </Link>
+                        ) : (
+                          <span className="muted">Sin vincular</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="small muted">
                       {session.source_system}
                       <br />
                       v{session.schema_version}

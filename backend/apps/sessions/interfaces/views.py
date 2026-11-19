@@ -27,10 +27,15 @@ from apps.athletes.infrastructure.repositories import DjangoAthleteRepository
 
 from ..application import (
     CompareSessions,
+    CreateTrainingSession,
     GetDashboardSummary,
     GetSessionDetail,
+    GetTrainingSession,
     IngestSessionContract,
+    ListTrainingSessions,
     ListSessionsByFilter,
+    TrainingSessionFilterInput,
+    UpdateTrainingSession,
 )
 from ..domain.exceptions import (
     AccessDenied,
@@ -39,13 +44,18 @@ from ..domain.exceptions import (
     SessionNotFound,
 )
 from ..infrastructure.contract_validator import JsonContractValidator
-from ..infrastructure.repositories import DjangoSessionRepository
+from ..infrastructure.repositories import (
+    DjangoSessionRepository,
+    DjangoTrainingSessionRepository,
+)
 from .serializers import (
     ComparisonSerializer,
     DashboardSummarySerializer,
     IngestionResultSerializer,
     SessionDetailSerializer,
     SessionListItemSerializer,
+    TrainingSessionPayloadSerializer,
+    TrainingSessionSerializer,
     parse_filters,
     parse_requester,
 )
@@ -57,6 +67,8 @@ __all__ = [
     "SessionDetailAPIView",
     "SessionCompareAPIView",
     "SessionIngestAPIView",
+    "TrainingSessionListAPIView",
+    "TrainingSessionDetailAPIView",
 ]
 
 
@@ -68,7 +80,7 @@ def translate_domain_error(exc: Exception) -> Response:
         return Response(
             {
                 "detail": "Acceso restringido: un estudiante solo puede consultar "
-                "sus propias sesiones.",
+                "los registros de su propio atleta.",
                 "session_id": exc.session_id,
             },
             status=status.HTTP_403_FORBIDDEN,
@@ -92,6 +104,7 @@ class SessionsAPIView(APIView):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         session_repository = DjangoSessionRepository()
+        training_repository = DjangoTrainingSessionRepository()
         athlete_repository = DjangoAthleteRepository()
         self._list = ListSessionsByFilter(session_repository)
         self._summary = GetDashboardSummary(session_repository)
@@ -100,6 +113,10 @@ class SessionsAPIView(APIView):
         self._ingest = IngestSessionContract(
             session_repository, athlete_repository, JsonContractValidator()
         )
+        self._list_training = ListTrainingSessions(training_repository)
+        self._get_training = GetTrainingSession(training_repository)
+        self._create_training = CreateTrainingSession(training_repository)
+        self._update_training = UpdateTrainingSession(training_repository)
 
 
 class DashboardSummaryView(SessionsAPIView):
@@ -181,3 +198,73 @@ class SessionIngestAPIView(SessionsAPIView):
         if result.rejected > 0 or result.accepted == 0:
             return Response(payload, status=status.HTTP_400_BAD_REQUEST)
         return Response(payload, status=status.HTTP_201_CREATED)
+
+
+class TrainingSessionListAPIView(SessionsAPIView):
+    """List trainings for staff or the authenticated student's athlete."""
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [IsAuthenticated(), IsTeacherOrAdmin()]
+        return super().get_permissions()
+
+    def get(self, request):
+        requester = parse_requester(request.user)
+        filters = {
+            "requester": requester,
+            "athlete_id": request.query_params.get("athlete_id") or None,
+        }
+        try:
+            items = self._list_training.execute(TrainingSessionFilterInput(**filters))
+        except (SessionNotFound, AccessDenied, InvalidSessionData) as exc:
+            return translate_domain_error(exc)
+        return Response(
+            [TrainingSessionSerializer.to_representation(item) for item in items]
+        )
+
+    def post(self, request):
+        serializer = TrainingSessionPayloadSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            item = self._create_training.execute(
+                serializer.to_input(parse_requester(request.user))
+            )
+        except (SessionNotFound, AccessDenied, InvalidSessionData) as exc:
+            return translate_domain_error(exc)
+        return Response(
+            TrainingSessionSerializer.to_representation(item),
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class TrainingSessionDetailAPIView(SessionsAPIView):
+    """Read a training record; only staff may edit it."""
+
+    def get_permissions(self):
+        if self.request.method == "PATCH":
+            return [IsAuthenticated(), IsTeacherOrAdmin()]
+        return super().get_permissions()
+
+    def get(self, request, training_session_id: int):
+        requester = parse_requester(request.user)
+        try:
+            item = self._get_training.execute(training_session_id, requester)
+        except (SessionNotFound, AccessDenied, InvalidSessionData) as exc:
+            return translate_domain_error(exc)
+        return Response(TrainingSessionSerializer.to_representation(item))
+
+    def patch(self, request, training_session_id: int):
+        serializer = TrainingSessionPayloadSerializer(
+            data=request.data, partial=True
+        )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            item = self._update_training.execute(
+                training_session_id,
+                serializer.to_input(parse_requester(request.user)),
+            )
+        except (SessionNotFound, AccessDenied, InvalidSessionData) as exc:
+            return translate_domain_error(exc)
+        return Response(TrainingSessionSerializer.to_representation(item))

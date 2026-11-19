@@ -30,6 +30,8 @@ from ..domain import (
     SessionNotFound,
     SessionRepositoryPort,
     SprintSession,
+    TrainingSession,
+    TrainingSessionRepositoryPort,
 )
 from .dtos import (
     VARIABLE_ORDER,
@@ -43,6 +45,9 @@ from .dtos import (
     SessionDetailDTO,
     SessionFilterInput,
     SessionListItemDTO,
+    TrainingSessionDTO,
+    TrainingSessionFilterInput,
+    TrainingSessionWriteInput,
     VariableDTO,
     _list_item,
     _variables,
@@ -54,6 +59,10 @@ __all__ = [
     "GetSessionDetail",
     "CompareSessions",
     "IngestSessionContract",
+    "ListTrainingSessions",
+    "GetTrainingSession",
+    "CreateTrainingSession",
+    "UpdateTrainingSession",
 ]
 
 
@@ -213,6 +222,7 @@ class GetSessionDetail:
             schema_version=schema if isinstance(schema, str) else None,
             observation=observation if isinstance(observation, str) else None,
             variables=_variables(session.metrics),
+            training_session_id=session.training_session_id,
         )
 
 
@@ -395,3 +405,114 @@ class IngestSessionContract:
                     message=str(exc),
                 )
         return None
+
+
+def _require_staff(requester: RequesterContext, athlete_id: str) -> None:
+    if not requester.can_read_all:
+        raise AccessDenied("training-session", athlete_id)
+
+
+def _training_output(session: TrainingSession) -> TrainingSessionDTO:
+    return TrainingSessionDTO.from_entity(session)
+
+
+class ListTrainingSessions:
+    """List training records, forcing students to their linked athlete."""
+
+    def __init__(self, repository: TrainingSessionRepositoryPort) -> None:
+        self._repository = repository
+
+    def execute(
+        self, filters: TrainingSessionFilterInput
+    ) -> list[TrainingSessionDTO]:
+        requester = filters.requester
+        athlete_id = (
+            requester.athlete_id if requester.is_student else filters.athlete_id
+        )
+        if requester.is_student and not athlete_id:
+            return []
+        return [
+            _training_output(session)
+            for session in self._repository.list(athlete_id=athlete_id)
+        ]
+
+
+class GetTrainingSession:
+    def __init__(self, repository: TrainingSessionRepositoryPort) -> None:
+        self._repository = repository
+
+    def execute(
+        self, session_id: int, requester: RequesterContext
+    ) -> TrainingSessionDTO:
+        session = self._repository.get_by_id(session_id)
+        if requester.is_student and session.athlete_id != requester.athlete_id:
+            raise AccessDenied(str(session_id), session.athlete_id)
+        return _training_output(session)
+
+
+class CreateTrainingSession:
+    def __init__(self, repository: TrainingSessionRepositoryPort) -> None:
+        self._repository = repository
+
+    def execute(self, data: TrainingSessionWriteInput) -> TrainingSessionDTO:
+        _require_staff(data.requester, data.athlete_id or "")
+        if (
+            data.athlete_id is None
+            or data.timestamp is None
+            or data.duration_minutes is None
+            or data.training_type is None
+            or data.attendance_status is None
+        ):
+            raise InvalidSessionData(
+                "athlete_id, timestamp, duration_minutes, training_type and "
+                "attendance_status are required",
+                field="training_session",
+            )
+        session = TrainingSession(
+            athlete_id=data.athlete_id,
+            timestamp=data.timestamp,
+            duration_minutes=data.duration_minutes,
+            training_type=data.training_type,
+            attendance_status=data.attendance_status,
+            coach=data.coach or "",
+            location=data.location or "",
+            follow_up_notes=data.follow_up_notes or "",
+            sprint_session_ids=data.sprint_session_ids or (),
+        )
+        return _training_output(self._repository.add(session))
+
+
+class UpdateTrainingSession:
+    def __init__(self, repository: TrainingSessionRepositoryPort) -> None:
+        self._repository = repository
+
+    def execute(
+        self, session_id: int, data: TrainingSessionWriteInput
+    ) -> TrainingSessionDTO:
+        existing = self._repository.get_by_id(session_id)
+        _require_staff(data.requester, existing.athlete_id)
+        updated = TrainingSession(
+            id=existing.id,
+            athlete_id=data.athlete_id or existing.athlete_id,
+            timestamp=data.timestamp or existing.timestamp,
+            duration_minutes=(
+                data.duration_minutes
+                if data.duration_minutes is not None
+                else existing.duration_minutes
+            ),
+            training_type=data.training_type or existing.training_type,
+            attendance_status=data.attendance_status or existing.attendance_status,
+            coach=data.coach if data.coach is not None else existing.coach,
+            location=data.location if data.location is not None else existing.location,
+            follow_up_notes=(
+                data.follow_up_notes
+                if data.follow_up_notes is not None
+                else existing.follow_up_notes
+            ),
+            sprint_session_ids=(
+                data.sprint_session_ids
+                if data.sprint_session_ids is not None
+                else existing.sprint_session_ids
+            ),
+        )
+        return _training_output(self._repository.update(updated))

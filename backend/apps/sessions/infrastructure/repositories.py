@@ -31,14 +31,24 @@ from ..domain import (
     SessionNotFound,
     SessionRepositoryPort,
     SprintSession,
+    TrainingSession,
+    TrainingSessionRepositoryPort,
     TimeSeriesPoint,
     UNIT_CADENCE,
     UNIT_SPEED,
     UNIT_STRIDE,
 )
-from .models import BiomechanicalMetricModel, SprintSessionModel
+from .models import (
+    BiomechanicalMetricModel,
+    SprintSessionModel,
+    TrainingSessionModel,
+)
 
-__all__ = ["DjangoSessionRepository", "SessionMapper"]
+__all__ = [
+    "DjangoSessionRepository",
+    "DjangoTrainingSessionRepository",
+    "SessionMapper",
+]
 
 
 def _domain_error(message: str, field: Optional[str]) -> InvalidSessionData:
@@ -62,6 +72,7 @@ class SessionMapper:
             timestamp=session.timestamp,
             test_type=session.test_type,
             metadata=dict(session.metadata),
+            training_session_id=session.training_session_id,
         )
 
     @staticmethod
@@ -114,6 +125,7 @@ class SessionMapper:
             metrics=cls._metrics_from_row(metric_row),
             metadata=dict(instance.metadata or {}),
             id=instance.pk,
+            training_session_id=instance.training_session_id,
         )
 
     @classmethod
@@ -255,6 +267,161 @@ class DjangoSessionRepository(SessionRepositoryPort):
         if filters.date_to:
             queryset = queryset.filter(timestamp__date__lte=filters.date_to)
         return queryset.order_by("-timestamp")
+
+
+class DjangoTrainingSessionRepository(TrainingSessionRepositoryPort):
+    """ORM adapter for individual training records and their sprint tests."""
+
+    def add(self, session: TrainingSession) -> TrainingSession:
+        athlete = self._athlete(session.athlete_id)
+        instance = self._to_model(session)
+        instance.athlete = athlete
+        try:
+            instance.full_clean()
+        except ValidationError as exc:
+            raise _domain_error(*_field_and_message(exc)) from exc
+
+        try:
+            with transaction.atomic():
+                instance.save()
+                self._sync_sprint_tests(instance, session)
+        except IntegrityError as exc:
+            raise InvalidSessionData(
+                "Could not persist the training session", field="training_session"
+            ) from exc
+
+        session.id = instance.pk
+        return session
+
+    def get_by_id(self, session_id: int) -> TrainingSession:
+        try:
+            instance = (
+                TrainingSessionModel.objects.select_related("athlete")
+                .prefetch_related("sprint_tests")
+                .get(pk=session_id)
+            )
+        except TrainingSessionModel.DoesNotExist:
+            raise SessionNotFound(str(session_id))
+        return self._to_entity(instance)
+
+    def list(self, athlete_id: Optional[str] = None) -> list[TrainingSession]:
+        queryset = TrainingSessionModel.objects.select_related("athlete").prefetch_related(
+            "sprint_tests"
+        )
+        if athlete_id:
+            queryset = queryset.filter(athlete__athlete_id=athlete_id)
+        return [self._to_entity(instance) for instance in queryset]
+
+    def update(self, session: TrainingSession) -> TrainingSession:
+        if session.id is None:
+            raise InvalidSessionData(
+                "A persisted training session is required for update",
+                field="id",
+            )
+        try:
+            instance = TrainingSessionModel.objects.get(pk=session.id)
+        except TrainingSessionModel.DoesNotExist:
+            raise SessionNotFound(str(session.id))
+
+        instance.athlete = self._athlete(session.athlete_id)
+        instance.timestamp = session.timestamp
+        instance.duration_minutes = session.duration_minutes
+        instance.training_type = session.training_type
+        instance.attendance_status = session.attendance_status
+        instance.coach = session.coach
+        instance.location = session.location
+        instance.follow_up_notes = session.follow_up_notes
+        try:
+            instance.full_clean()
+        except ValidationError as exc:
+            raise _domain_error(*_field_and_message(exc)) from exc
+
+        try:
+            with transaction.atomic():
+                instance.save()
+                self._sync_sprint_tests(instance, session)
+        except IntegrityError as exc:
+            raise InvalidSessionData(
+                "Could not update the training session",
+                field="training_session",
+            ) from exc
+        return self.get_by_id(instance.pk)
+
+    @staticmethod
+    def _athlete(athlete_id: str) -> AthleteModel:
+        try:
+            return AthleteModel.objects.get(athlete_id=athlete_id)
+        except AthleteModel.DoesNotExist:
+            raise InvalidSessionData(
+                "athlete_id must identify an existing athlete",
+                field="athlete_id",
+            )
+
+    @staticmethod
+    def _sync_sprint_tests(
+        instance: TrainingSessionModel, session: TrainingSession
+    ) -> None:
+        tests = list(
+            SprintSessionModel.objects.select_for_update()
+            .filter(session_id__in=session.sprint_session_ids)
+            .select_related("athlete")
+        )
+        if len(tests) != len(session.sprint_session_ids):
+            raise InvalidSessionData(
+                "Every sprint_session_id must identify an existing sprint test",
+                field="sprint_session_ids",
+            )
+        for test in tests:
+            if test.athlete_id != instance.athlete_id:
+                raise InvalidSessionData(
+                    "Sprint tests must belong to the training session athlete",
+                    field="sprint_session_ids",
+                )
+            if (
+                test.training_session_id is not None
+                and test.training_session_id != instance.pk
+            ):
+                raise InvalidSessionData(
+                    "A sprint test can belong to only one training session",
+                    field="sprint_session_ids",
+                )
+
+        SprintSessionModel.objects.filter(training_session=instance).update(
+            training_session=None
+        )
+        if tests:
+            SprintSessionModel.objects.filter(
+                pk__in=[test.pk for test in tests]
+            ).update(training_session=instance)
+
+    @staticmethod
+    def _to_model(session: TrainingSession) -> TrainingSessionModel:
+        return TrainingSessionModel(
+            timestamp=session.timestamp,
+            duration_minutes=session.duration_minutes,
+            training_type=session.training_type,
+            attendance_status=session.attendance_status,
+            coach=session.coach,
+            location=session.location,
+            follow_up_notes=session.follow_up_notes,
+        )
+
+    @staticmethod
+    def _to_entity(instance: TrainingSessionModel) -> TrainingSession:
+        return TrainingSession(
+            athlete_id=instance.athlete.athlete_id,
+            timestamp=instance.timestamp,
+            duration_minutes=instance.duration_minutes,
+            training_type=instance.training_type,
+            attendance_status=instance.attendance_status,
+            coach=instance.coach,
+            location=instance.location,
+            follow_up_notes=instance.follow_up_notes,
+            sprint_session_ids=tuple(
+                sorted(test.session_id for test in instance.sprint_tests.all())
+            ),
+            id=instance.pk,
+        )
 
 
 def _metric_row_of(instance: SprintSessionModel) -> BiomechanicalMetricModel:

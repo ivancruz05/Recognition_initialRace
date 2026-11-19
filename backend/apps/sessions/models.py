@@ -7,6 +7,14 @@ logic, no fields, just so the ORM and ``makemigrations`` can see the
 models registered under the ``sessions`` app label.
 """
 
-from .infrastructure.models import BiomechanicalMetricModel, SprintSessionModel
+from .infrastructure.models import (
+    BiomechanicalMetricModel,
+    SprintSessionModel,
+    TrainingSessionModel,
+)
 
-__all__ = ["SprintSessionModel", "BiomechanicalMetricModel"]
+__all__ = [
+    "SprintSessionModel",
+    "BiomechanicalMetricModel",
+    "TrainingSessionModel",
+]

@@ -15,9 +15,13 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
-from .entities import SprintSession
+from .entities import SprintSession, TrainingSession
 
-__all__ = ["SessionFilters", "SessionRepositoryPort"]
+__all__ = [
+    "SessionFilters",
+    "SessionRepositoryPort",
+    "TrainingSessionRepositoryPort",
+]
 
 
 @dataclass(frozen=True)
@@ -71,3 +75,23 @@ class SessionRepositoryPort(ABC):
     @abstractmethod
     def exists(self, session_id: str) -> bool:
         """True when ``session_id`` is already persisted."""
+
+
+class TrainingSessionRepositoryPort(ABC):
+    """Persistence port for individual athlete training sessions."""
+
+    @abstractmethod
+    def add(self, session: TrainingSession) -> TrainingSession:
+        """Persist a training session and link its sprint test records."""
+
+    @abstractmethod
+    def get_by_id(self, session_id: int) -> TrainingSession:
+        """Return one training session or raise ``SessionNotFound``."""
+
+    @abstractmethod
+    def list(self, athlete_id: Optional[str] = None) -> list[TrainingSession]:
+        """Return sessions newest first, optionally for one athlete."""
+
+    @abstractmethod
+    def update(self, session: TrainingSession) -> TrainingSession:
+        """Update a persisted session and synchronize its sprint test links."""
