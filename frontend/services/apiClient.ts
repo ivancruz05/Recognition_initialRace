@@ -199,8 +199,15 @@ export const api = {
     return request<Profile>("/auth/me/");
   },
 
-  dashboardSummary(): Promise<DashboardSummary> {
-    return request<DashboardSummary>("/dashboard/summary/");
+  dashboardSummary(filters: SessionFilters = {}): Promise<DashboardSummary> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== null && String(value).trim() !== "") {
+        params.set(key, String(value));
+      }
+    }
+    const query = params.toString();
+    return request<DashboardSummary>(`/dashboard/summary/${query ? `?${query}` : ""}`);
   },
 
   listSessions(filters: SessionFilters = {}): Promise<SessionListItem[]> {
@@ -260,6 +267,10 @@ export const api = {
 
   listAthletes(): Promise<Athlete[]> {
     return request<Athlete[]>("/athletes/");
+  },
+
+  getAthlete(athleteId: string): Promise<Athlete> {
+    return request<Athlete>(`/athletes/${encodeURIComponent(athleteId)}/`);
   },
 };
 

@@ -1,4 +1,5 @@
-"use client";
+import { DashboardHome } from "@/components/dashboard/DashboardHome";
 
-// Ruta explícita descrita en la monografía; la ruta raíz se conserva como alias.
-export { default } from "../page";
+export default function DashboardPage() {
+  return <DashboardHome />;
+}

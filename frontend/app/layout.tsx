@@ -3,10 +3,26 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import { AuthProvider } from "./AuthProvider";
 import { TopBar } from "@/components/TopBar";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { Barlow_Condensed, IBM_Plex_Mono, Inter } from "next/font/google";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const display = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-barlow",
+  display: "swap",
+});
+const mono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "CADI · Fase II",
@@ -16,11 +32,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" className={cn("font-sans", geist.variable)}>
+    <html lang="es" className={`${inter.variable} ${display.variable} ${mono.variable}`}>
       <body>
         <AuthProvider>
-          <TopBar />
-          {children}
+          <TopBar>{children}</TopBar>
         </AuthProvider>
       </body>
     </html>

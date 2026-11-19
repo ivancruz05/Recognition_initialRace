@@ -47,17 +47,17 @@ NEXT_PUBLIC_API_URL=http://localhost:8001/api/v1
 
 ## Estructura
 
-- `app/` — páginas (App Router): login, `/dashboard`, sesiones, detalle de sesión,
-  comparación + recomendaciones, ingesta. Todas son componentes cliente y
-  consumen la API mediante `services/apiClient.ts`.
+- `app/` — páginas (App Router): login, `/dashboard`, roster y ficha
+  seudonimizada, histórico de sesiones, detalle, comparación/revisión e ingesta.
+  Todas consumen la API mediante `services/apiClient.ts`.
 - `components/ui/` — componentes shadcn/ui (Button, Card, Badge, Table, Select,
   Input, Label, Tabs y Separator) usados junto con los estilos de dominio CADI.
 - `services/apiClient.ts` — cliente tipado (tokens en `localStorage`,
   `Authorization` automático, cierre de sesión y redirección a `/login` ante 401).
 - `services/auth.ts` — contexto/hooks de sesión (`useAuth`, `useRequireAuth`).
 - `types/contracts.ts` — tipos del contrato de la API.
-- `components/` — barra de navegación, estados (carga/error/vacío) y gráficos
-  SVG de velocidad y comparación por variable.
+- `components/` — shell con sidebar desktop / navegación móvil, estados
+  (carga/error/vacío) y gráficos SVG vinculados a datos de la API.
 
 ## Notas
 
