@@ -311,14 +311,11 @@ function CompareContent() {
                     dataset {analytics.dataset_version} · estado {analytics.execution_status}
                   </p>
 
-                  <div
-                    className={analytics.model_version === null ? "notice-box" : "success-box"}
-                    style={{ marginBottom: 14 }}
-                  >
-                    {analytics.model_version === null
-                      ? "Modelo predictivo: sin evaluación empírica."
-                      : `Modelo predictivo: versión ${analytics.model_version}.`}
-                  </div>
+                  {analytics.model_version !== null && (
+                    <div className="success-box" style={{ marginBottom: 14 }}>
+                      Modelo predictivo: versión {analytics.model_version}.
+                    </div>
+                  )}
 
                   {analytics.recommendations.length === 0 ? (
                     <EmptyState>
@@ -427,18 +424,11 @@ function CompareContent() {
                       </div>
                     )}
 
-                  <div className="notice-box">
-                    <strong>Límites del análisis:</strong> {analytics.limits}
-                    <br />
-                    {analytics.evaluation.note}
-                  </div>
                 </>
               )}
             </Card>
           ) : (
-            <div className="notice-box student-review-note" role="status">
-              La consulta de analítica y recomendaciones está reservada a Docentes y Estudiantes.
-            </div>
+            null
           )}
         </>
       )}
