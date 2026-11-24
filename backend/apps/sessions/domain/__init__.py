@@ -16,6 +16,8 @@ from .entities import (
     MetricValue,
     PostureMetric,
     SprintSession,
+    TrainingSession,
+    TRAINING_ATTENDANCE_STATUSES,
     TimeSeriesPoint,
 )
 from .exceptions import (
@@ -25,7 +27,11 @@ from .exceptions import (
     InvalidSessionData,
     SessionNotFound,
 )
-from .repositories import SessionFilters, SessionRepositoryPort
+from .repositories import (
+    SessionFilters,
+    SessionRepositoryPort,
+    TrainingSessionRepositoryPort,
+)
 
 __all__ = [
     "AccessDenied",
@@ -40,7 +46,10 @@ __all__ = [
     "SessionFilters",
     "SessionNotFound",
     "SessionRepositoryPort",
+    "TrainingSessionRepositoryPort",
     "SprintSession",
+    "TrainingSession",
+    "TRAINING_ATTENDANCE_STATUSES",
     "TimeSeriesPoint",
     "UNIT_CADENCE",
     "UNIT_POSTURE",

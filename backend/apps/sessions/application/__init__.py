@@ -20,6 +20,9 @@ from .dtos import (
     SessionListItemDTO,
     SeriesPointDTO,
     VariableDTO,
+    TrainingSessionDTO,
+    TrainingSessionFilterInput,
+    TrainingSessionWriteInput,
 )
 from .use_cases import (
     CompareSessions,
@@ -27,6 +30,10 @@ from .use_cases import (
     GetSessionDetail,
     IngestSessionContract,
     ListSessionsByFilter,
+    ListTrainingSessions,
+    GetTrainingSession,
+    CreateTrainingSession,
+    UpdateTrainingSession,
 )
 
 __all__ = [
@@ -43,9 +50,16 @@ __all__ = [
     "SessionListItemDTO",
     "SeriesPointDTO",
     "VariableDTO",
+    "TrainingSessionDTO",
+    "TrainingSessionFilterInput",
+    "TrainingSessionWriteInput",
     "CompareSessions",
     "GetDashboardSummary",
     "GetSessionDetail",
     "IngestSessionContract",
     "ListSessionsByFilter",
+    "ListTrainingSessions",
+    "GetTrainingSession",
+    "CreateTrainingSession",
+    "UpdateTrainingSession",
 ]

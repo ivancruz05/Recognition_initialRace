@@ -13,6 +13,8 @@ import type {
   SessionDetail,
   SessionFilters,
   SessionListItem,
+  TrainingSession,
+  TrainingSessionPayload,
 } from "@/types/contracts";
 
 /** Error tipado que lanza el cliente ante cualquier fallo de la API. */
@@ -272,6 +274,33 @@ export const api = {
   getAthlete(athleteId: string): Promise<Athlete> {
     return request<Athlete>(`/athletes/${encodeURIComponent(athleteId)}/`);
   },
+
+  listTrainingSessions(athleteId?: string): Promise<TrainingSession[]> {
+    const query = athleteId
+      ? `?${new URLSearchParams({ athlete_id: athleteId }).toString()}`
+      : "";
+    return request<TrainingSession[]>(`/training-sessions/${query}`);
+  },
+
+  createTrainingSession(
+    payload: TrainingSessionPayload,
+  ): Promise<TrainingSession> {
+    return request<TrainingSession>("/training-sessions/", {
+      method: "POST",
+      body: payload,
+    });
+  },
+
+  updateTrainingSession(
+    id: number,
+    payload: Partial<TrainingSessionPayload>,
+  ): Promise<TrainingSession> {
+    return request<TrainingSession>(`/training-sessions/${id}/`, {
+      method: "PATCH",
+      body: payload,
+    });
+  },
+
 };
 
 function getStoredRefresh(): string | null {

@@ -7,6 +7,7 @@ import {
   Activity,
   ArrowUpRight,
   ChartNoAxesCombined,
+  ClipboardList,
   Database,
   LayoutDashboard,
   LogOut,
@@ -32,6 +33,7 @@ export function TopBar({ children }: { children: ReactNode }) {
   const isStaff = profile.user_type === "teacher" || profile.user_type === "admin";
   const links: NavItem[] = [
     { href: "/dashboard", label: "Resumen", icon: LayoutDashboard },
+
   ];
   if (isStaff) links.push({ href: "/athletes", label: "Atletas", icon: Users });
   links.push({ href: "/sessions", label: isStaff ? "Pruebas" : "Mis sesiones", icon: Activity });
